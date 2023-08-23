@@ -1,0 +1,119 @@
+
+{% load static %}
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+
+    <link rel="stylesheet" href="{% static 'css/form.css' %}" />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <div class="home">
+          <a href="/" class="logo"> <li>Sociopedia</li></a>
+          <li>{% include 'feed/search.html' %}</li>
+        </div>
+
+        <div class="home">
+          <button class="new__post" onclick="showUploadModal()">
+            New Post
+          </button>
+          <img
+            src="{% static 'assets/sun.svg' %}"
+            alt="sun"
+            class="nav__el"
+            onclick="changeTheme()"
+          />
+          <a href="/message"
+            ><img
+              src="{% static 'assets/chat.svg' %}"
+              alt="chat"
+              class="nav__el"
+          /></a>
+          <img
+            src="{% static 'assets/notification.svg' %}"
+            alt="notification"
+            class="nav__el"
+          />
+          <div>
+            <img
+              src="{{profile.profile.url}}"
+              alt="{{user.name}}"
+              class="profile__img"
+              onclick="showModal()"
+            />
+          </div>
+        </div>
+      </ul>
+    </nav>
+
+    {% block content %} {%endblock %}
+    <div class="model" onclick="handleClose()" id="model">
+      <div class="model_content">
+        <a href="/profile/{{user.username}}">
+          <div class="flex">
+            <img
+              src="{{profile.profile.url}}"
+              alt=""
+              srcset=""
+              class="profile__img"
+            />
+            <h4>{{user.username}}</h4>
+          </div>
+        </a>
+
+        <div class="flex">
+          <a href="/logout" class="logout">Logout</a>
+        </div>
+      </div>
+    </div>
+    <div class="model" id="upload__model">
+      <div class="model_content__upload">
+        <div class="justify-end" onclick="handleCloseUpload()">
+          <img
+            src="{%static 'assets/close.svg' %}"
+            alt="close"
+            class="icon"
+            title="close"
+          />
+        </div>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <h4>Upload Pics</h4>
+          <label class="upload__container" for="upload_input" title="upload">
+            <img
+              src="{% static 'assets/upload.svg' %}"
+              alt=""
+              class="icon__lg"
+            />
+            <input
+              type="file"
+              id="upload_input"
+              class="upload__input"
+              name="post_img"
+            />
+          </label>
+          <h4>Caption</h4>
+          <label class="upload__caption" for="upload_caption" title="upload">
+            <textarea
+              name="caption"
+              id="upload_caption"
+              cols="20"
+              rows="10"
+              placeholder="Caption"
+            >
+            </textarea>
+          </label>
+          <div class="post__model_submit">
+            <button class="post" type="submit">Post</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="{% static 'js/theme.js' %}"></script>
+    <script src="{% static 'js/change.js' %}"></script>
+  </body>
+</html>

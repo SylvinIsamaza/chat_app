@@ -1,0 +1,45 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+</head>
+<body>
+<div class="signup__container">
+
+    <form method="POST" class="form bg-white">
+        {% csrf_token %}
+        <h2>Login</h2>
+        <div class="messages">
+            {% for message in messages %}
+            <h5 style="color:red">{{ message }}</h5>
+            {% endfor %}
+        </div>
+
+        <div class="form__input-cont">
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" placeholder="Enter your Username" class="form__input">
+            </label>
+        </div>
+        <div class="form__input-cont">
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Enter your password" class="form__input">
+
+        </div>
+        <div class="form__forgot">
+            <a href="reset">Forgot password ?</a>
+        </div>
+        <div class="submit__div">
+            <button type="submit">Sign in</button>
+            <div>
+                <p>Don't have account <a href="/signup">Create account</a></p>
+            </div>
+        </div>
+
+
+    </form>
+
+</div>
+</body>
+</html>

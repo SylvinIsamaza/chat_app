@@ -1,0 +1,15 @@
+{% load static %}
+
+
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="{% static 'css/search.css' %}"/>
+</head>
+<body>
+<form class="search__div" action="../search">
+    {%  csrf_token %}
+ <input type="search" placeholder="Search here ..." name="search">
+    <img src="{% static 'assets/search.svg' %}" class="search__icon">
+</form>
+</body>

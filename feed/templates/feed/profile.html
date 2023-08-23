@@ -1,0 +1,115 @@
+{% extends 'feed/base.html' %}
+{% load static %}
+{% block content %}
+<div class="profile_container">
+    <div class="flex-col">
+
+        <div class="post__img_cont"
+             style="background:url('{{latest_post.image.url}}'); background-repeat: no-repeat;background-size: cover; background-position: center;">
+            <div class="normal__flex items-center">
+                <div class="flex ">
+                    <img alt="" class="profile_banner_image" src="{{user_profile.profile.url}}">
+                    <div class="">
+                        <h3>{{profile_username}}</h3>
+                        <p>{{user_profile.bio}}</p>
+                    </div>
+
+
+                </div>
+                <div class="flex padding-l-20px ">
+                    {% if len_post == 0 %}
+                    <h4>No post</h4>
+                    {% elif len_post == 1 %}
+                    <h4>1 Post</h4>
+                    {% else %}
+                    <h4 class="text-center">{{len_post}} Posts</h4>
+                    {% endif %}
+
+                    {% if friends == 0 %}
+
+                    {% elif friends == 1 %}
+                    <h4>1 friend</h4>
+                    {% else %}
+                    <h4>{{friends}} Friends</h4>
+                    {% endif %}
+                    {% if not isOwner %}
+
+                    <a href='/add_friend?username={{user_profile}}' class="add_friend_btn">
+                        {% if not is_friend %}
+                        Add friend
+                        {% else %}
+                        Remove
+                        {% endif %}
+
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <h5 class="text-center">Posts</h5>
+            <div class=" flex justify-center">
+                <div class="flex-col prof_container__el ">
+                    {% for post in user_post %}
+                    <div class="padding margin__top bg__white rounded-sm post_container">
+
+                        <div class="normal__flex post__div">
+                            <div class="flex gap-sm">
+                                <img src="{{profile.profile.url}}" alt="{{user.username}}" class="profile__img">
+                                <div>
+                                    <h4>{{post.user}}</h4>
+                                </div>
+
+                            </div>
+                            {% if not isOwner %}
+                            <div class="relative add__friend">
+                                <img src="{% static 'assets/account.svg' %}" alt="add friend" srcset="" class="icon">
+                                <p class="absolute icon__absolute">
+                                    +
+                                </p>
+                            </div>
+                            {% else %}
+                            <div class="relative add__friend">
+                                <img src="{% static 'assets/menu.svg' %}" alt="add friend" srcset="" class="icon">
+
+                            </div>
+
+                            {% endif %}
+
+
+                        </div>
+                        <h4 class="padding__top">{{post.caption}}</h4>
+                        <img src="{{post.image.url}}" class="w-full rounded-sm margin__top">
+                        <div class="normal__flex padding__top padding__bottom">
+                            <div class="flex ">
+                                <div class="like-comment">
+
+                                    <a href="/like?post_id={{post.id}}">
+                                        <img src="{% static 'assets/like.svg' %}" alt="" srcset="" class="icon">
+                                    </a>
+                                    {% if post.no_of_like == 0 %}
+
+                                    {% else %}
+                                    <span>{{post.no_of_like}}</span>
+
+                                    {% endif %}
+                                </div>
+
+                                <img src="{% static 'assets/comment.svg' %}" alt="" srcset="" class="icon">
+                                <img src="{% static 'assets/share.svg' %}" alt="" srcset="" class="icon">
+                            </div>
+
+
+                            <img src="{% static 'assets/save.svg' %}" alt="" srcset="" class="icon">
+                        </div>
+
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,357 @@
+{% extends 'feed/base.html' %} {% load static %} {% block content %}
+
+<div class="container relative">
+  <div class="container__el__1" id="container__first">
+    <div class="normal__flex bg__white">
+      <div class="flex">
+        <img
+          src="{{profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <h5 class="bold">{{user.username}}</h5>
+          <p class="normal__paragraph">
+            {% if profile.friends == 0 %} {% else %} {{profile.friends}} friends
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <img src="{% static 'assets/account.svg' %}" class="icon" />
+    </div>
+    <hr />
+    <div class="normal__flex">
+      <p class="normal__paragraph">Number of posts</p>
+      <p class="padding__top normal__paragraph">{{len_post}} posts</p>
+    </div>
+    <div class="normal__flex">
+      <p class="normal__paragraph">Total Like of your posts</p>
+      <p class="normal__paragraph">{{len_like}}</p>
+    </div>
+    {% if len_friend == 0 %}
+    <h4>Friend request</h4>
+    {% for friend in friend_request %} 
+    {% if len_friend_request == 0 %}
+        <h4>No new request</h4>
+        {% else %}
+        <div class="flex-col padding__bottom">
+          <div class="flex">
+            <img
+              src="{{friend.profile.profile.url}}"
+              alt="{{user.username}}"
+              class="profile__img"
+            />
+            <div>
+              <h4>{{friend.friend_username}}</h4>
+              <p class="truncate">30 mutual friends</p>
+            </div>
+          </div>
+          <div class="flex justify-center padding__top">
+            <a
+              href="confirm_friend?username={{friend.user.username}}"
+              class="post"
+              >Accept</a
+            >
+            <a
+              href="delete_friend?username={{friend.user.username}}"
+              class="delete"
+              >Delete</a
+            >
+          </div>
+        </div>
+        {% endif %}
+         {% endfor %}
+
+    {% else %}
+    <h4 class="text-center  padding__top">Friends</h4>
+    {% for friend in friends %}
+    <div class=" margin__top bg__white rounded-sm post_container">
+      <div class="normal__flex post__div">
+        {% if friend.user.username == user.username%}
+        <div class="flex gap-sm">
+          <img
+            src="{{friend.sender_profile.profile.url}}"
+            alt="{{user.username}}"
+            class="profile__img"
+          />
+          <div>
+            
+            <p>{{friend.friend_username}}</p>
+            <p>{{friend.sender_profile.friends}} Friends</p>
+            {% else%}
+            <div class="flex gap-sm">
+              <img
+                src="{{friend.receiver_profile.profile.url}}"
+                alt="{{user.username}}"
+                class="profile__img"
+              />
+              <div>
+                
+              
+            <p>{{friend.user}}</p>
+            
+            
+            <p>{{friend.receiver_profile.friends}} Friends</p>
+            {% endif %}
+          </div>
+         
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  
+     {% for social_media in user.socialProfiles %}
+    <div class="normal__flex">
+      <a href="{{social_media.social.url}}" class="profile__link">
+        <div class="flex padding__top">
+          <img
+            src="{{social_media.social.icon}}"
+            alt="{{social_media.social.username}}"
+            srcset=""
+            class="icon"
+          />
+          <p class="profile__link">{{social_media.social.username}}</p>
+        </div>
+      </a>
+
+      <img src="{% static 'assets/edit.svg' %}" alt="" srcset="" class="icon" />
+    </div>
+    {% endfor %}
+  </div>
+  <div class="container__el">
+    <div class="padding bg__white rounded-sm">
+      <div class="flex post__div">
+        <img
+          src="{{profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <input
+          type="text"
+          username="post_caption"
+          class="post__caption"
+          placeholder="Whats on your mind"
+        />
+      </div>
+      <div class="normal__flex padding__top">
+        <div class="flex">
+          <img
+            src="{% static 'assets/sun.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+          <p>Image</p>
+        </div>
+
+        <div class="flex">
+          <img
+            src="{% static 'assets/moon.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+          <p>Image</p>
+        </div>
+        <div class="flex">
+          <img
+            src="{% static 'assets/sun.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+          <p>Image</p>
+        </div>
+        <div class="flex">
+          <img
+            src="{% static 'assets/moon.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+          <p>Image</p>
+        </div>
+        <button class="post">Post</button>
+      </div>
+    </div>
+    {% for post in posts %}
+    <div class="padding margin__top bg__white rounded-sm post_container">
+      <div class="normal__flex post__div">
+        <a href="profile/{{post.user}}">
+          <div class="flex gap-sm">
+            <img
+              src="{{post.profile.profile.url}}"
+              alt="{{user.username}}"
+              class="profile__img"
+            />
+            <div>
+              <h4>{{post.user}}</h4>
+              <p>{{location}}</p>
+            </div>
+          </div>
+        </a>
+        <div class="relative add__friend">
+          <img
+            src="{% static 'assets/account.svg' %}"
+            alt="add friend"
+            srcset=""
+            class="icon"
+          />
+          <p class="absolute icon__absolute">+</p>
+        </div>
+      </div>
+      <h4 class="padding__top padding__bottom">
+        {{post.caption}} {{post.created__at}}
+      </h4>
+      <img src="{{post.image.url}}" class="w-full rounded-sm margin__top" />
+      <div class="normal__flex padding__top padding__bottom">
+        <div class="flex">
+          <div class="like-comment">
+            <a href="like?post_id={{post.id}}">
+              <img
+                src="{% static 'assets/like.svg' %}"
+                alt=""
+                srcset=""
+                class="icon"
+              />
+            </a>
+            {% if post.no_of_like == 0 %} {% else %}
+            <span>{{post.no_of_like}}</span>
+
+            {% endif %}
+          </div>
+
+          <img
+            src="{% static 'assets/comment.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+          <img
+            src="{% static 'assets/share.svg' %}"
+            alt=""
+            srcset=""
+            class="icon"
+          />
+        </div>
+
+        <img
+          src="{% static 'assets/save.svg' %}"
+          alt=""
+          srcset=""
+          class="icon"
+        />
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="container__el__1" id="last__cont">
+    <div class="bg__white padding rounded-sm">
+      <div class="normal__flex padding__bottom">
+        <h3 class="padding__bottom">Messages</h3>
+        <img src="{% static 'assets/chat.svg' %}" alt="" srcset="" />
+      </div>
+
+      <div class="flex relative">
+        <input
+          type="text"
+          class="post__caption"
+          placeholder="Search for friends ..."
+        />
+
+        <img
+          src="{% static 'assets/search.svg' %}"
+          alt="search"
+          class="search__message__icon icon"
+        />
+      </div>
+      <div class="flex padding__top padding__bottom">
+        <h4 class="active">Messages</h4>
+        <h4 class="unactive">Requests</h4>
+      </div>
+      <div class="flex padding__top padding__bottom">
+        <img
+          src="{{profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <h4>{{user.username}}</h4>
+          <p class="truncate">This is how we work</p>
+        </div>
+      </div>
+      <div class="flex padding__bottom">
+        <img
+          src="{{profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <h4>{{user.username}}</h4>
+          <p class="truncate">This is how we work</p>
+        </div>
+      </div>
+      <div class="flex padding__bottom">
+        <img
+          src="{{profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <h4>{{user.username}}</h4>
+          <p class="truncate">This is how we work</p>
+        </div>
+      </div>
+    </div>
+    <div class="bg__white padding rounded-sm margin__top__lg overflow-auto">
+      <div class="">
+        <div class="normal__flex">
+          <h3>Friend requests</h3>
+          
+          <div class="relative add__friend">
+            <img
+              src="{% static 'assets/account.svg' %}"
+              alt="add friend"
+              srcset=""
+              class="icon"
+            />
+            <p class="absolute icon__absolute">+</p>
+          </div>
+        </div>
+
+        {% for friend in friend_request %} {% if len_friend_request == 0 %}
+        <h4>No new request</h4>
+        {% else %}
+        <div class="flex-col padding__bottom">
+          <div class="flex">
+            <img
+              src="{{friend.sender_profile.url}}"
+              alt="{{user.username}}"
+              class="profile__img"
+            />
+            <div>
+              <h4>{{friend.friend_username}}</h4>
+              <p class="truncate">30 mutual friends</p>
+            </div>
+          </div>
+          <div class="flex justify-center padding__top">
+            <a
+              href="confirm_friend?username={{friend.friend_username}}"
+              class="post"
+              >Accept</a
+            >
+            <a
+              href="delete_friend?username={{friend.user.username}}"
+              class="delete"
+              >Delete</a
+            >
+          </div>
+        </div>
+        {% endif %} {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

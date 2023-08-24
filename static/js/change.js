@@ -27,9 +27,18 @@ function handleClose() {
 
 }
 
-function handleUpload(event){
-  const image_url= URL.createObjectURL(event.target.files[0])
-console.log(image_url)
+async function handleUpload(event){
+  const image_url=await converToBase64(event.target.files[0])
+  profile = document.getElementById('profile-image')
+  profile.src = image_url
+  profile.classList.remove("upload__container")
+  document.getElementById('profile-image').classList.add('upload__container-image')
+  
+  document.getElementById('upload_container').style.padding = '0px'
+  document.getElementById('upload_container').style.background = 'transparent'
+
+  
+  
 }
 
 function handleEmailChange(e){
@@ -43,4 +52,14 @@ function handleInputChange(data){
 function handleSubmit(event) {
   event.preventDefault()
   document.getElementById("message").value=""
+}
+async function converToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader()
+    fileReader.readAsDataURL(file)
+    fileReader.onload = () => { resolve(fileReader.result) }
+    fileReader.onerror = (error) => {
+      reject(error)
+    }
+  })
 }

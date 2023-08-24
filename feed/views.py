@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render, redirect, get_object_or_404
 import random
-from .models import Profile, Post, Friend,Like_post,Room,Message
+from .models import Profile, Post, Friend,Like_post,Room,Message,User_Room
 from .utils.friend import make_friend, confirm_friend, delete_friend
 from .utils.like import like_post
-
+from django.http import JsonResponse,HttpResponse
+import threading
 
 # Create your views here.
 
@@ -46,6 +47,7 @@ def signup_view(request):
 
 @login_required(login_url="/login")
 def homepage_view(request):
+    
     user_profile = Profile.objects.get(user=request.user)
     user_post = Post.objects.filter(user=request.user)
     
@@ -169,7 +171,7 @@ def setting_view(request):
 
 
 @login_required(login_url='/login')
-def message_view(request):
+def message_view(request,username):
     user_profile = Profile.objects.get(user=request.user)
 
     friends=list()
@@ -181,27 +183,58 @@ def message_view(request):
     if frnd_possblty_2:
         for friend in frnd_possblty_2:
             friends.append(friend)
+    current_sender_friend=None
+    current_receiver_friend=None
+    current_room=None
+    for friend in friends:
+        if friend.sender_profile==Profile.objects.get(user=User.objects.get(username=username)) :
+            current_sender_friend=friend
             
+        if friend.receiver_profile==Profile.objects.get(user=User.objects.get(username=username)):
+            current_receiver_friend=friend
+
+   
+        if Room.objects.filter(name__icontains=username):
+          for rooms in Room.objects.filter(name__icontains=username):
+            if rooms.name==username+"-"+request.user.username or rooms.name==request.user.username+"-"+username:
+                if User_Room.objects.get(user=request.user,room=rooms):      
+                    room=User_Room.objects.filter(user=request.user,room=rooms)
+
+        if room:
+            for room in room:
+                current_room=room.room.name
+              
+               
+        else:
+            current_room=username+"-"+request.user.username
+
+    
+    
+    
+    
+    
+    
+
+    
+
+
+        
+  
+            
+    
     context = {
         "user": user_profile.user,
         "profile": user_profile,
-        "friends":friends
+        "friends":friends,
+        "username":username,
+        "current_sender_friend":current_sender_friend,
+        "current_receiver_friend":current_receiver_friend,
+        "current_room":current_room,
+        
+        
         
     }
-    if request.method =='POST':
-        room=request.POST['room']
-        username=request.POST['username']
-        value=request.POST['value']
-        print(room)
-        print(username)
-        print(value)
-        
-        if Room.objects.filter(name=room):
-            Message.objects.create(value=value,room=Room.objects.get(name=room),user=User.objects.get(username=username))
 
-        else:
-            Room.objects.create(name=room)
-            Message.objects.create(value=value,room=Room.objects.get(name=room),user=User.objects.get(username=username))
             
             
         
@@ -321,5 +354,58 @@ def search_view(request):
 
     }
     return render(request, 'feed/search_page.html', context)
+@login_required(login_url='/login')
+def get_messages(request,username):
+    room=None
+    messages_list=list()
+    if Room.objects.filter(name__icontains=username):
+        for rooms in Room.objects.filter(name__icontains=username):
+            if rooms.name==username+"-"+request.user.username or rooms.name==request.user.username+"-"+username:
+                if User_Room.objects.get(user=request.user,room=rooms):      
+                    room=User_Room.objects.filter(user=request.user,room=rooms)
+
+    if room:
+        for room in room:
+            current_room=room.room.name
+            print(current_room)
+            if Message.objects.filter(room=Room.objects.get(name=current_room)):
+                messages=Message.objects.filter(room=Room.objects.get(name=current_room))
+                for message in messages:
+                    messages_list.append({"value":message.value,"user":{"username":message.user.username},"sender":{"username":message.sender.username},"date":message.date})
+    else:
+        current_room=username+"-"+request.user.username
+    
+    return JsonResponse({"messages":list(messages_list)})
+    
 
 
+    
+    
+def send_message(request):
+    if request.method =='POST':
+        room=request.POST['room']
+        
+        value=request.POST['message']
+        username=request.POST['username']
+
+        
+        if Room.objects.filter(name=room):
+            Message.objects.create(value=value,room=Room.objects.get(name=room),user=User.objects.get(username=username),sender=request.user)
+            # Message.objects.create(value=value,room=Room.objects.get(name=room),user=request.user,sender=User.objects.get(username=username))
+            if User_Room.objects.filter(room=Room.objects.get(name=room),user=User.objects.get(username=username)):
+                pass
+            else:
+                User_Room.objects.create(room=Room.objects.get(name=room),user=User.objects.get(username=username))
+                User_Room.objects.create(room=Room.objects.get(name=room),user=request.user)
+
+        else:
+            Room.objects.create(name=room)
+            Message.objects.create(value=value,room=Room.objects.get(name=room),user=User.objects.get(username=username),sender=request.user)
+            # Message.objects.create(value=value,room=Room.objects.get(name=room),user=request.user,sender=User.objects.get(username=username))
+            if User_Room.objects.filter(room=Room.objects.get(name=room),user=User.objects.get(username=username)):
+                pass
+            else:
+                User_Room.objects.create(room=Room.objects.get(name=room),user=User.objects.get(username=username))
+                User_Room.objects.create(room=Room.objects.get(name=room),user=request.user)
+    return HttpResponse("Message sent successfully")
+    

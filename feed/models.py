@@ -62,7 +62,7 @@ class Friend(models.Model):
 
 class Room(models.Model):
     name=models.CharField(max_length=500)
-    
+   
     
     def __str__(self):
         return self.name
@@ -70,8 +70,15 @@ class Message(models.Model):
     value=models.CharField(max_length=1000000)
     date=models.DateTimeField(default=datetime.now,blank=True)
     room=models.ForeignKey(Room,on_delete=models.CASCADE)
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="receiver",default=None)
+    sender=models.ForeignKey(User,on_delete=models.CASCADE,related_name="sender",default=None)
     
     def __str__(self):
-        return self.value
-    
+        return self.user.username
+
+class User_Room(models.Model):
+    room=models.ForeignKey(Room,on_delete=models.CASCADE,blank=False)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,blank=False)
+
+    def __str__(self):
+        return self.user.username

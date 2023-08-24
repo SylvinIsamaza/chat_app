@@ -1,34 +1,35 @@
 {% extends 'feed/base.html' %} {% load static%} {% block content %}
-<div class="normal__flex gap-sm justify-center  " id='cont'>
+<div class="normal__flex gap-sm justify-center" id='cont'>
   <div class="friend__list flex-col bg-white rounded-sm padding">   
     {% for friend in friends %}
     <div class=" margin__top bg__white rounded-sm post_container">
       <div class="normal__flex post__div">
         {% if friend.user.username == user.username%}
         <div class="flex gap-sm">
-          <img
-            src="{{friend.sender_profile.profile.url}}"
-            alt="{{user.username}}"
-            class="profile__img"
-          />
-          <div>
-            
-            <p>{{friend.friend_username}}</p>
-            <p>{{friend.sender_profile.friends}} Friends</p>
+       <a href="../../message/{{friend.sender_profile.user}}">
+        <img
+        src="{{friend.sender_profile.profile.url}}"
+        alt="{{user.username}}"
+        class="profile__img"
+      />
+      <div>
+        
+        <p>{{friend.friend_username}}</p>
+        <p>{{friend.sender_profile.friends}} Friends</p>
+       </a>  
             {% else%}
             <div class="flex gap-sm">
-              <img
+              <a href="../../message/{{friend.receiver_profile.user}}">
+                <img
                 src="{{friend.receiver_profile.profile.url}}"
                 alt="{{user.username}}"
                 class="profile__img"
               />
               <div>
                 
-              
-            <p>{{friend.user}}</p>
-            
-            
-            <p>{{friend.receiver_profile.friends}} Friends</p>
+                <p>{{friend.user.username}}</p>
+                <p>{{friend.receiver_profile.friends}} Friends</p>
+               </a> 
             {% endif %}
           </div>
          
@@ -39,25 +40,32 @@
   </div>
   <div class="message_cont bg-white rounded-sm">
     <div class="normal__flex bg-white rounded-sm padding">
-     <a href="profile/isamaza">
+     <a href="../../profile/{{username}}">
       <div class="flex">
-        <img src="{% static 'assets/p1.jpeg' %}" alt="" class="profile__img" />
-        <p>Isamaza</p>
+        
+        {% if current_sender_friend %}
+        <img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__img" />
+        {% else %}
+        <img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__img" />
+        {% endif %}
+          
+        
+        <p>{{username}}</p>
       </div>
 
      </a> 
       <img src="{% static 'assets/menu.svg' %}" alt="" class="icon">
      
     </div>
-    <div class="message_chat_room gap-sm">
-      <div class="message_cont rounded-sm">
-
+    <div class="message_chat_room gap">
+      <div class="message_cont rounded-sm" id="message_cont">
+        
       </div>
-      <form action="" method='POST' onsubmit="handleSubmit()">
+      <form  id="message-form">
         {% csrf_token %}
       <input type="text" class="send_message rounded-md relative" placeholder="Message" id="message" name="value"/>
       <input type="hidden" name="username" id="username" value="{{user.username}}">
-      <input type="hidden" name="room" id="room" value="">
+      <input type="hidden" name="room" id="room" value="{{current_room}}">
         <button class="absolute send__absolute" title="send" type="submit" id="submit_button">
           <img src="{% static 'assets/send.svg' %}" alt="send" class="icon">  
         </button>
@@ -74,5 +82,54 @@
     </div>
   </div>
 </div>
+<script>
+  $(document).on('submit', '#message-form', function (e) {
+    e.preventDefault();
+    $.ajax({
+      type: 'POST',
+      url: '../../send_message',
+      data: {
+        username: $('#username').val(),
+        room: $('#room').val(),
+        message: $('#message').val(),
+        csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success:function(data){
+        alert(data)
+      }
+    })
+    document.getElementById('message').value=''
+  })
+  const div=document.createElement('div')
+  message_div=""
+  $(document).ready(function () {
+    setInterval(function(){
+      $.ajax({
+        type: 'GET',
+        url: "../../get_message/{{username}}",
+        success: function (response) {
+          
+          $('#message_cont').empty()
+          console.log(response.messages)
+  
+         
+          response.messages.map((message)=>{
+            temp='<div class=""><div class="sender_message-cont"><div class="justify-end  margin__top__lg gap-sm"><p class="user_title">'+message.sender.username+'</p><div class="send__message"><p>'+message.value+'</p></div><img src="{{profile.profile.url}}" alt="+{{profile.user}}+"class="profile__msg_img"></div></div></div>'
+          temp2='<div class="flex gap-sm margin__top__lg">{% if current_sender_friend %}<img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__msg_img" />{% else %}<img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__msg_img" />{% endif %}<div class="receive__message"><p>'+message.value+'</p></div></div>'
+          
+             if (message.sender.username == "{{request.user.username}}"){
+            $('#message_cont').append(temp)
+            }
+            else{
+            $('#message_cont').append(temp2)
+            } 
+          })
+        }
+      })
+    },1000)
 
+  
+  })
+</script>
+  
 {% endblock %}

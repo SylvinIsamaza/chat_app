@@ -1,4 +1,4 @@
-let theme = localStorage.getItem("theme")||"light"
+let theme = localStorage.getItem("theme") || "light";
 const changeTheme = () => {
   if (theme == "light") {
     theme = "dark";
@@ -13,4 +13,12 @@ const changeTheme = () => {
     localStorage.setItem("theme", "light");
   }
 };
-
+const themeChanger = () => {
+  console.log("changing theme");
+  if (theme == "dark") {
+    document.body.style.backgroundColor = "black";
+  } else if (theme == "light") {
+    document.body.style.backgroundColor = "rgb(230, 230, 230)";
+  }
+};
+document.body.addEventListener("load", themeChanger);

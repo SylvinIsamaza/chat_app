@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view
+from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view,get_messages,send_message
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -30,8 +30,9 @@ urlpatterns = [
     path('confirm_friend/', confirm_friend_view, name='confirm friend'),
     path('delete_friend/', delete_friend_view, name='delete friend'),
     path('search/', search_view, name='search'),
-
-    path('message/', message_view, name='Message'),
+    path('get_message/<str:username>', get_messages, name='Get messages'),
+    path('send_message', send_message, name='Send messages'),
+    path('message/<str:username>', message_view, name='Message'),
     path('add_friend/', friend_view, name='Add friend'),
     path('', homepage_view, name='homepage')
 

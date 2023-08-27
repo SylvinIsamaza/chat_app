@@ -250,7 +250,9 @@
               src="{% static 'assets/save.svg' %}"
               alt=""
               srcset=""
-              class="icon"
+              class="icon share",
+              data-post_id="{{post.id}}"
+              
             />
           </div>
           <div
@@ -387,20 +389,27 @@
     </div>
     <form id="share_container" class="justify-center align-center">
       <div class="bg-white padding rounded-sm share_container_content">
-        <div class="justify-end">
+        <div class="justify-end padding__bottom">
           <img src="{% static 'assets/close.svg' %}" alt="" class="icon" onclick="closeShareModal()">
         </div>
         
         {%  if len_friend == 0 %}
           
         {% else %}
-        <h4>Select friends</h4>
+        <div class="search__div" action="../search" id="search">
+          {%  csrf_token %}
+       <input type="search" placeholder="Search here ..." name="search" id='search_input'>
+          <img src="{% static 'assets/search.svg' %}" class="search__icon">
+        </div>
+        <h4 class="padding__top">Select friends</h4>
         {% for friend in friends %}
+        <input type="hidden" name="number_of_selected" value={{forloop.counter}}>
+
         <div class="margin__top bg__white rounded-sm post_container">
           <div class="normal__flex post__div">
             {% if friend.user.username == user.username%}
             <div class="flex gap-sm">
-              <input type="checkbox" name="username" id="{{friend.user.username}}">
+              <input type="checkbox" name="{{forloop.counter}}" id="{{friend.user.username}}" value="{{friend.user.username}}">
               <label for="{{friend.user.username}}" class="flex w-full" >                  <img
                 src="{{friend.receiver_profile.profile.url}}"
                 alt="{{user.username}}"
@@ -414,7 +423,7 @@
               </div></label>
                 {% else%}
                 <div class="flex gap-sm">
-              <input type="checkbox" name="username" id="{{friend.friend_username}}">
+              <input type="checkbox" name="{{forloop.counter}}" id="{{friend.friend_username}}" value="{{friend.friend_username}}">
 <label for="{{friend.friend_username}}" class="flex w-full">                  <img
   src="{{friend.receiver_profile.profile.url}}"
   alt="{{user.username}}"
@@ -464,6 +473,25 @@
           }
         })
       })})
+
+      $(document).ready(function(){$('.share').on('click',function(){
+        let postId=$(this).data('post_id');
+        console.log(postId)
+        $.ajax({
+          type:'POST',
+          url:"../../save",
+          data:{
+            post_id:postId,
+            csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
+          },
+          success:function(data){
+
+            alert(data)
+          }
+        })
+      })})
+
+
   function handleOpenComment(post_id) {
         let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
         $.ajax({

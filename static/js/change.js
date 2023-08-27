@@ -58,4 +58,4 @@ async function converToBase64(file) {
     };
   });
 }
-comment = document.getElementById("comment").insertBefore();
+

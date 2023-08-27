@@ -116,6 +116,46 @@
         </form>
       </div>
     </div>
+    {% comment %} mobile navigation bar {% endcomment %}
+    <nav id="mobile_nav">
+      <ul>
+        <div class="home">
+          <a href="/" class="logo"> <li>Sociopedia</li></a>
+          <li>{% include 'feed/search.html' %}</li>
+        </div>
+
+        <div class="home">
+          <button class="new__post" onclick="showUploadModal()">
+            New Post
+          </button>
+          <img
+            src="{% static 'assets/sun.svg' %}"
+            alt="sun"
+            class="nav__el"
+            onclick="changeTheme()"
+          />
+          <a href="/message"
+            ><img
+              src="{% static 'assets/chat.svg' %}"
+              alt="chat"
+              class="nav__el"
+          /></a>
+          <img
+            src="{% static 'assets/notification.svg' %}"
+            alt="notification"
+            class="nav__el"
+          />
+          <div>
+            <img
+              src="{{profile.profile.url}}"
+              alt="{{user.name}}"
+              class="profile__img"
+              onclick="showModal()"
+            />
+          </div>
+        </div>
+      </ul>
+    </nav>
     <script >
       
 $(document).on('submit','#upload-form',function(e){

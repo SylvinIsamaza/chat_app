@@ -109,16 +109,25 @@ class Reply_Reply(models.Model):
     post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="replied_post")
     user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="replied_user")
     Reply=models.ForeignKey(Reply,on_delete=models.CASCADE,default=None)
+    
+    def __str__(self):
+        return self.user.username
 
 
 class Saved_Post(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4)
     post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="saved_post")
     user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="user_who_save_post")
+    
+    def __str__(self):
+        return self.user.username
 
 class Shared_Post(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4)
     post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="shared_post")
     user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="user_who_share_post")
     to=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="shared_to_user")
+    
+    def __str__(self):
+        return self.to.username
     

@@ -517,13 +517,13 @@ def save(request):
         user=request.user,
         post_id=request.POST['post_id']
         
-        Saved_Post.objects.create(user=user,post=Post.objects.get(id=post_id))
-        saved_posts=Saved_Post.objects.filtet(post=Post.objects.get(id=post_id))
+        Saved_Post.objects.create(user=request.user,post=Post.objects.get(id=post_id))
+        saved_posts=Saved_Post.objects.filter(post=Post.objects.get(id=post_id))
         print(saved_posts)  
         for saved_post in saved_posts:
             saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
 
-        return JsonResponse({"saved":saved_list})
+        return HttpResponse("saved successfully")
 
 def get_saved_post(request):
     saved_list=list()
@@ -569,6 +569,4 @@ def get_shared_post(request):
     for shared_post in shared_post:
         shared_list.append({"user":{"username":shared_post.user.username},"post":{"id":shared_post.post.id},"profile":Profile.objects.get(user=shared_post.user)})
     return JsonResponse({"saved":shared_list})
-
-
 

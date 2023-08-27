@@ -462,6 +462,10 @@ p.profile__link {
   .container {
     padding: 3px 20px;
   }
+  .share_container_content{
+    width: 100%;
+      
+  }
 }
 
 .post_container {
@@ -771,4 +775,10 @@ p.profile__link {
   padding: 5px 10px;
   border-radius: 5px;
   color: white;
+}
+#search_input{
+  width: 100%;
+}
+#mobile_nav{
+  
 }

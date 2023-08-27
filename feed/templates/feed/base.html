@@ -81,7 +81,7 @@
             title="close"
           />
         </div>
-        <form method="POST" enctype="multipart/form-data" onsubmit="handleSubmit()">
+        <form method="POST" enctype="multipart/form-data"  id="upload-form">
           {% csrf_token %}
           <h4>Upload Pics</h4>
           <label class="upload__container" for="upload_input" title="upload" id="upload_container">
@@ -116,7 +116,29 @@
         </form>
       </div>
     </div>
-    
+    <script >
+      
+$(document).on('submit','#upload-form',function(e){
+  post_img=document.getElementById('upload_input').files[0]
+  e.preventDefault()
+  let formData =new FormData()
+  formData.append('caption',$('#upload_caption').val())
+  formData.append('post_img',$('#upload_input')[0].files[0])
+  formData.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val())
+  $.ajax({
+    type:"POST",
+    url:"../../upload_post",
+    data: formData,
+    processData:false,
+    contentType:false,
+    success:function(data){
+     alert(data)
+     console.log(post_img)
+    }
+  })
+
+})
+    </script>
     <script src="{% static 'js/theme.js' %}"></script>
     <script src="{% static 'js/change.js' %}"></script>
   </body>

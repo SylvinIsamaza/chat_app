@@ -1,6 +1,6 @@
 {% extends 'feed/base.html' %} {% load static%} {% block content %}
 <div class="normal__flex gap-sm justify-center" id='cont'>
-  <div class="friend__list flex-col bg-white rounded-sm padding">   
+  <div class="friend__list flex-col bg-white rounded-sm padding" id="friend__list">   
     {% for friend in friends %}
     <div class=" margin__top bg__white rounded-sm post_container">
       <div class="normal__flex post__div">
@@ -95,7 +95,7 @@
         csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
       },
       success:function(data){
-        alert(data)
+       
       }
     })
     document.getElementById('message').value=''
@@ -120,7 +120,7 @@
              if (message.sender.username == "{{request.user.username}}"){
             $('#message_cont').append(temp)
             }
-            else{
+            else{ 
             $('#message_cont').append(temp2)
             } 
           })

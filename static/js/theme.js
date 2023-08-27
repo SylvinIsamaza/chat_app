@@ -16,9 +16,10 @@ const changeTheme = () => {
 const themeChanger = () => {
   console.log("changing theme");
   if (theme == "dark") {
+
     document.body.style.backgroundColor = "black";
   } else if (theme == "light") {
     document.body.style.backgroundColor = "rgb(230, 230, 230)";
   }
 };
-document.body.addEventListener("load", themeChanger);
+document.body.addEventListener("loadstart", themeChanger);

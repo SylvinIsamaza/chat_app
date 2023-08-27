@@ -35,7 +35,9 @@ class Post(models.Model):
     caption = models.TextField()
     createdAt = models.DateTimeField(default=datetime.now)
     no_of_like = models.IntegerField(default=0)
-    comments = [models.TextField()]
+    no_of_comments=models.IntegerField(default=0)
+    no_of_shares=models.IntegerField(default=0)
+    
 
     def __str__(self):
         return self.user
@@ -82,3 +84,41 @@ class User_Room(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class Comment(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    value=models.CharField(max_length=10000,blank=False,default=None)
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="posts")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="User")
+    
+    
+    def __str__(self):  
+      return self.value 
+
+class Reply(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    value=models.CharField(max_length=10000,blank=False,default=None)
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="reply_post")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="reply_user")
+    comment=models.ForeignKey(Comment,on_delete=models.CASCADE,default=None)
+
+
+class Reply_Reply(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    value=models.CharField(max_length=10000,blank=False,default=None)
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="replied_post")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="replied_user")
+    Reply=models.ForeignKey(Reply,on_delete=models.CASCADE,default=None)
+
+
+class Saved_Post(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="saved_post")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="user_who_save_post")
+
+class Shared_Post(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4)
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,blank=False,default=None,related_name="shared_post")
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="user_who_share_post")
+    to=models.ForeignKey(User,on_delete=models.CASCADE,default=None,blank=False,related_name="shared_to_user")
+    

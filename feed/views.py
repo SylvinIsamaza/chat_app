@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render, redirect, get_object_or_404
 import random
-from .models import Profile, Post, Friend,Like_post,Room,Message,User_Room
+from .models import Profile, Post, Friend,Like_post,Room,Message,User_Room,Comment,Saved_Post,Reply_Reply,Saved_Post,Shared_Post
 from .utils.friend import make_friend, confirm_friend, delete_friend
 from .utils.like import like_post
 from django.http import JsonResponse,HttpResponse
@@ -91,19 +91,7 @@ def homepage_view(request):
         "len_friends":len(friends)
     }
 
-    if request.method == 'POST':
-        if request.FILES.get('post_img') is None:
-            caption = request.POST['caption']
-            user = user_profile.user
-            Post.objects.create(caption=caption, user=user.username, profile=Profile.objects.get(user=request.user))
 
-        if request.FILES.get('post_img'):
-            image = request.FILES.get('post_img')
-            caption = request.POST['caption']
-            user = user_profile.user
-            Post.objects.create(caption=caption, user=user.username, image=image,
-                                profile=Profile.objects.get(user=request.user))
-            print(image)
 
     return render(request, 'feed/homepage.html', context)
 
@@ -164,7 +152,7 @@ def setting_view(request):
             user_profile.user.username = request.POST['username']
             print(request.POST['username'])
             user_profile.user.email = request.POST['email']
-            print(request.POST['email'])
+            
             user_profile.save()
 
     return render(request, "feed/setting.html", context)
@@ -245,10 +233,11 @@ def message_view(request,username):
 def like_view(request):
     username = request.user.username
 
-    post_id = request.GET.get('post_id')
+    post_id = request.POST['post_id']
 
     like_post(username, post_id)
-    return redirect('/')
+    post_like=Post.objects.get(id=post_id)
+    return HttpResponse(post_like.no_of_like)
 
 
 @login_required(login_url='/login')
@@ -408,4 +397,178 @@ def send_message(request):
                 User_Room.objects.create(room=Room.objects.get(name=room),user=User.objects.get(username=username))
                 User_Room.objects.create(room=Room.objects.get(name=room),user=request.user)
     return HttpResponse("Message sent successfully")
+
+def upload_post(request):
+    user_profile = Profile.objects.get(user=request.user)
+    if request.method == 'POST':
+        if request.FILES.get('post_img') is None:
+            caption = request.POST['caption']
+            user = user_profile.user
+            Post.objects.create(caption=caption, user=user.username, profile=Profile.objects.get(user=request.user))
+
+    if request.FILES.get('post_img'):
+        image = request.FILES.get('post_img')
+        caption = request.POST['caption']
+        user = user_profile.user
+        Post.objects.create(caption=caption, user=user.username, image=image,
+                            profile=Profile.objects.get(user=request.user))
+        print(image)
+    return HttpResponse("post uploaded successfully")
+
+def upload_comment_view(request):
+    if request.method == 'POST':
+        comment=request.POST.get('comment')
+        
+        print(comment)
+        
+        post_id=request.POST['post_id']
+        print(post_id)
+        Comment.objects.create(value=comment,post=Post.objects.get(id=post_id),user=request.user)
+        
+        post=Post.objects.get(id=post_id)
+        post.no_of_comments=post.no_of_comments+1
+        post.save()
+        
+    return HttpResponse(post.no_of_comments)
+
+def get_comment_view(request):
+    comment_list=list()
+    if request.method == 'GET':
+        post_id=request.GET.get('post_id')
+        print(post_id)
+        comments=Comment.objects.filter(post=Post.objects.get(id=post_id))
+        for comment in comments:
+            comment_list.append({"value":comment.value,"post":{
+                "id":comment.post.id,
+                "user":comment.post.user,
+            
+                
+            },"user":{
+                "username":comment.user.username,
+                "profile":Profile.objects.get(user=comment.user).profile.url
+            }})
+  
+        
+        
+    return JsonResponse({"comment":comment_list})
+        
+        
+def upload_reply(request):
+    reply_list=list()
+    if request.method=='POST':
+        value=request.POST['value']
+        comment_id=request.POST['comment_id']
+        user=request.user,
+        post_id=request.POST['post_id']
+        
+        Saved_Post.objects.create(user=user,post=Post.objects.get(id=post_id),value=value,comment=Comment.objects.get(id=comment_id))
+        replies=Saved_Post.objects.filtet(comment=Comment.objects.get(id=comment_id))
+        
+        post=Post.objects.get(id=post_id)
+        post.no_of_comments=post.no_of_comments+1
+        post.save()
+        for reply in replies:
+            reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"comment":{"id":reply.comment.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
+        return JsonResponse({"replies":reply_list})
+
+def get_replies(request):
+    reply_list=list()
     
+    if request.method=="GET":
+        comment_id=request.GET['comment_id']
+        
+        
+        replies=Saved_Post.objects.filtet(comment=Comment.objects.get(id=comment_id))
+        print(replies)
+        for reply in replies:
+            reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"comment":{"id":reply.comment.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
+    return JsonResponse({"replies":reply_list})
+
+
+def upload_reply_to_reply(request):
+    if request.method == "POST":
+        reply_id = request.POST.get('reply_id')
+        value=request.POST.get('value')
+        user=request.user,
+        post_id=request.POST.get('post_id')
+    
+        Reply_Reply.objects.create(user=user,reply=Saved_Post.objects.get(id=reply_id),value=value,post=Post.objects.get(id=post_id))
+
+        post=Post.objects.get(id=post_id)
+        post.no_of_comments=post.no_of_comments+1
+        post.save()
+def get_replies_of_replies(request):
+    reply_list=list()
+    
+    if request.method=="GET":
+        reply_id=request.GET['reply_id']
+        
+        
+        replies=Reply_Reply.objects.filtet(reply=Saved_Post.objects.get(id=reply_id))
+        print(replies)
+        for reply in replies:
+            reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"reply":{"id":reply.reply.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
+    return JsonResponse({"replies":reply_list})
+
+
+def save(request):
+    saved_list=list()
+    if request.method=='POST':
+        user=request.user,
+        post_id=request.POST['post_id']
+        
+        Saved_Post.objects.create(user=user,post=Post.objects.get(id=post_id))
+        saved_posts=Saved_Post.objects.filtet(post=Post.objects.get(id=post_id))
+        print(saved_posts)  
+        for saved_post in saved_posts:
+            saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
+
+        return JsonResponse({"saved":saved_list})
+
+def get_saved_post(request):
+    saved_list=list()
+    
+    if request.method=="GET":
+        post_id=request.GET['post_id']
+        
+        
+    
+    saved_posts=Saved_Post.objects.filtet(post=Post.objects.get(id=post_id))
+    print(saved_posts)
+    for saved_post in saved_posts:
+        saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
+    return JsonResponse({"saved":saved_list})
+
+def share(request):
+    shared_list=list()
+    if request.method=='POST':
+        user=request.user,
+        post_id=request.POST['post_id']
+        
+        Shared_Post.objects.create(user=user,post=Post.objects.get(id=post_id))
+        shared_post=Shared_Post.objects.filtet(post=Post.objects.get(id=post_id))
+        print(shared_post)
+        post=Post.objects.get(id=post_id)
+        post.no_of_shares=post.no_of_shares+1
+        post.save()
+        for shared_post in shared_post:
+            shared_list.append({"user":{"username":shared_post.user.username},"post":{"id":shared_post.post.id},"profile":Profile.objects.get(user=shared_post.user)})
+        return JsonResponse({"saved":shared_list})
+
+def get_shared_post(request):
+    shared_list=list()
+    
+    if request.method=="GET":
+        post_id=request.GET['post_id']
+        
+        
+    
+    shared_post=Shared_Post.objects.filtet(post=Post.objects.get(id=post_id))
+    print(shared_post)
+
+    for shared_post in shared_post:
+        shared_list.append({"user":{"username":shared_post.user.username},"post":{"id":shared_post.post.id},"profile":Profile.objects.get(user=shared_post.user)})
+    return JsonResponse({"saved":shared_list})
+
+
+

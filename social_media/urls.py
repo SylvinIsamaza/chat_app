@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view,get_messages,send_message
+from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view,get_messages,send_message,upload_post,upload_comment_view,get_comment_view,upload_reply,upload_reply_to_reply,get_replies,get_replies_of_replies
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -26,13 +26,22 @@ urlpatterns = [
     path('logout/', logout, name='Logout'),
     path('settings/', setting_view, name='Setting'),
     path('profile/<str:username>', profile_view, name='Profile'),
-    path('like/', like_view, name='Like'),
+    path('like', like_view, name='Like'),
     path('confirm_friend/', confirm_friend_view, name='confirm friend'),
     path('delete_friend/', delete_friend_view, name='delete friend'),
     path('search/', search_view, name='search'),
     path('get_message/<str:username>', get_messages, name='Get messages'),
     path('send_message', send_message, name='Send messages'),
+    path('upload_post', upload_post, name='Upload post'),
+    path('comment', upload_comment_view, name='Upload Comment'),
+    path('get_comment',get_comment_view,name="Get comment"),
+    
     path('message/<str:username>', message_view, name='Message'),
+    path('reply',upload_reply, name='Crete Reply'),
+    path('get_reply',get_replies, name='get replies'),
+    path('reply_to_reply',upload_reply_to_reply, name='Reply to reply'),
+    path('get_reply_to_reply',get_replies_of_replies, name='get Reply to reply'),
+    
     path('add_friend/', friend_view, name='Add friend'),
     path('', homepage_view, name='homepage')
 

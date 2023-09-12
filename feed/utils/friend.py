@@ -1,7 +1,7 @@
 from ..models import Friend,Profile
 from django.contrib.auth.models import User
 def make_friend(user,friend_username):
-    friend_exist=Friend.objects.filter(friend_username=friend_username).first()
+    friend_exist=Friend.objects.filter(friend_username=friend_username,user=user).first()
     friend_user=User.objects.get(username=friend_username)
     if friend_exist:
         friend_exist.delete()
@@ -37,4 +37,6 @@ def confirm_friend(user,friend_username):
 
 def delete_friend(user):
     new_friend = Friend.objects.filter(user=user)
+    new_profile=Profile.objects.get(user=user)
+    new_profile.friends=new_profile.friends-1
     new_friend.delete()

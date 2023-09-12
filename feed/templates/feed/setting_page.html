@@ -1,0 +1,39 @@
+{% extends 'feed/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="profile__container">
+        <form method="POST" class="form bg-white" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form__input-cont flex">
+        <img src="{{profile.profile.url}}" class="model__clicked-img rounded-sm">
+        <label for="profile_img" class="upload rounded-sm">Upload</label>
+    <input type="file" name="profile" class="hidden" id="profile_img" onchange="handleUpload(event)">
+    </div>
+
+    <div class="form__input-cont">
+        <label for="username">Username</label>
+    <input type="text" name="username" id="username" placeholder="Enter your username" class="form__input" required value="{{user.username}}">
+    </div>
+    <div class="form__input-cont">
+        <label for="email">Email</label>
+    <input type="email" name="email" id="email" placeholder="Enter your email" class="form__input" value="{{user.email}}" required>
+        </label>
+    </div>
+    <div class="form__input-cont">
+        <label for="bio">Bio</label>
+        <textarea name="bio" id="bio" placeholder="Bio" class="form__input">{{profile.bio}}</textarea>
+
+    </div>
+    <div class="form__input-cont">
+        <label for="location">Location</label>
+    <input type="text" name="location" id="location" placeholder="Location" class="form__input" required value="{{profile.location}}">
+
+    </div>
+    <div class="submit__div">
+         <button type="submit">Save</button>
+
+    </div>
+        </form>
+    </div>

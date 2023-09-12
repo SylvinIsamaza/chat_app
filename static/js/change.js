@@ -1,9 +1,47 @@
+function handleCloseNotification(){
+  document.getElementById("notification_cont").style.display = "none"
+  document.getElementById("notification__model").style.display="none"
+}
 function showModal() {
-  document.getElementById("model").style.display = "flex";
+  handleCloseNotification()
+  handleCloseUpload()
+  document.getElementById("model").style.display = "flex";  
+  
+
+}
+
+function handleMessageModal() {
+  element = document.getElementById("message_model");
+  if (element.style.display == "none") {
+    showMessageModal();
+    showSearchMobile();
+  } else {
+    closeMessageModal();
+  }
+}
+element = document.querySelector(".mobile_nav .search");
+element.addEventListener("click", () => showSearchMobile());
+function showSearchMobile() {
+  console.log("clicked");
+  {
+    document.getElementById("search__div").style.display = "block";
+
+    element.style.display = "none";
+  }
+}
+
+function showMessageModal() {
+  document.getElementById("message_model").style.display = "flex";
+}
+function closeMessageModal() {
+  document.getElementById("message_model").style.display = "none";
 }
 function showShareModal(post_id) {
   document.getElementById("share_container").style.display = "flex";
-  document.getElementById('share_container').setAttribute('data-post-id',post_id)
+  
+  document
+    .getElementById("post-share-id")
+    .setAttribute("value", post_id);
 }
 
 function closeShareModal() {
@@ -12,6 +50,9 @@ function closeShareModal() {
 
 function showUploadModal() {
   console.log("uploading model");
+  handleCloseNotification()
+
+  handleClose()
   openModal = true;
   document.getElementById("upload__model").style.display = "flex";
 }

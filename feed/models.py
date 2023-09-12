@@ -131,3 +131,26 @@ class Shared_Post(models.Model):
     def __str__(self):
         return self.to.username
     
+    
+
+class Notification(models.Model):
+    value=models.TextField(blank=False,null=False)
+    user=models.ForeignKey(User,on_delete=models.CASCADE,default=None,related_name="user")
+    post=models.ForeignKey(Post,on_delete=models.CASCADE,default=None,related_name="post")
+    date=models.DateTimeField(default=datetime.now)
+    viewed=models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.value
+    
+
+class Activity(models.Model):
+    value=models.TextField(blank=False)
+    date=models.DateTimeField(default=datetime.now)
+    post_id=models.CharField(max_length=300,blank=True)
+    user=models.ForeignKey(User,blank=False,on_delete=models.CASCADE)
+    
+    
+    
+    def __str__(self):
+        return self.value

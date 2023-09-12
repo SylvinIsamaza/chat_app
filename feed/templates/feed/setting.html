@@ -1,42 +1,464 @@
-{% extends 'feed/base.html' %}
-{% load static %}
-{% block content %}
+{% extends 'feed/base.html' %} {% load static %} {% block content %}
+<div class="flex padding sidebar">
+  <div
+    class="sidebar__cont bg-white padding__top padding__bottom rounded-md gap-md"
+  >
+    <a
+      href="../settings/account"
+      class="sidebar_item gap-sm padding rounded-sm"
+    >
+      <img
+        src="{% static 'assets/light/account.svg' %}"
+        alt="Account"
+        class="icon account"
+      />
+      <p>Account</p>
+    </a>
+    <a href="../settings/saved" class="sidebar_item gap-sm padding rounded-sm">
+      <img
+        src="{% static 'assets/light/save.svg' %}"
+        alt="Account"
+        class="icon save"
+      />
+      <p>Saved</p>
+    </a>
+    <a
+      href="../settings/appearance"
+      class="sidebar_item gap-sm padding rounded-sm"
+    >
+      <img
+        src="{% static 'assets/light/moon.svg' %}"
+        alt="Account"
+        class="icon sun"
+      />
+      <p>Appearance</p>
+    </a>
 
-    <div class="profile__container">
-        <form method="POST" class="form bg-white" enctype="multipart/form-data">
+    <a
+      href="../settings/notification"
+      class="sidebar_item gap-sm padding rounded-sm"
+    >
+      <img
+        src="{% static 'assets/light/notification.svg' %}"
+        alt="Account"
+        class="icon notification"
+      />
+      <p>Notification</p>
+    </a>
+    <a
+      href="../settings/activity_log"
+      class="sidebar_item gap-sm padding rounded-sm"
+    >
+      <img
+        src="{% static 'assets/light/activity.svg' %}"
+        alt="Account"
+        class="icon activity"
+      />
+      <p>Activity log</p>
+    </a>
+
+    <a
+      href="../settings/report_problem"
+      class="sidebar_item gap-sm padding rounded-sm"
+    >
+      <img
+        src="{% static 'assets/light/logout.svg' %}"
+        alt="Account"
+        class="icon logout"
+      />
+      <p>Report problem</p>
+    </a>
+    <a href="../settings/help" class="sidebar_item gap-sm padding rounded-sm">
+      <img
+        src="{% static 'assets/light/logout.svg' %}"
+        alt="Account"
+        class="icon logout"
+      />
+      <p>Help</p>
+    </a>
+
+    <a href="../../logout" class="sidebar_item gap-sm padding rounded-sm">
+      <img
+        src="{% static 'assets/light/logout.svg' %}"
+        alt="Account"
+        class="icon logout"
+      />
+      <p>Logout</p>
+    </a>
+  </div>
+  
+  <div class="active_setting_cont bg-white rounded-md ">
+    
+    {% if tab == "account" %}
+    <h1 class="text-center">{{tab}}</h1>
+    <div class="profile__container ">
+        <form method="POST" class="form  bg-white" enctype="multipart/form-data">
     {% csrf_token %}
 
     <div class="form__input-cont flex">
-        <img src="{{profile.profile.url}}" class="model__clicked-img rounded-sm">
-        <label for="profile_img" class="upload rounded-sm">Upload</label>
+
+       <img src="{{profile.profile.url}}" class="model__clicked-img rounded-sm" title="upload image">
+       <label for="profile_img" class="  profile_label rounded-sm">
+        <img src="{% static 'assets/dark/upload.svg' %}" alt="" class="upload__icon icon"> 
+        <p>Upload image</p>
+       </label> 
     <input type="file" name="profile" class="hidden" id="profile_img" onchange="handleUpload(event)">
     </div>
 
-    <div class="form__input-cont">
-        <label for="username">Username</label>
-    <input type="text" name="username" id="username" placeholder="Enter your username" class="form__input" required value="{{user.username}}">
+    <div class="flex">
+        <div class="form__input-cont">
+            <label for="username">Username</label>
+        <input type="text" name="username" id="username" placeholder="Enter your username" class="form__input" required value="{{user.username}}">
+        </div>
+        <div class="form__input-cont">
+            <label for="email">Email</label>
+        <input type="email" name="email" id="email" placeholder="Enter your email" class="form__input" value="{{user.email}}" required>
+            </label>
+        </div>
     </div>
-    <div class="form__input-cont">
-        <label for="email">Email</label>
-    <input type="email" name="email" id="email" placeholder="Enter your email" class="form__input" value="{{user.email}}" required>
-        </label>
+    <div class="flex">
+        <div class="form__input-cont">
+            <label for="location">Location</label>
+        <input type="text" name="location" id="location" placeholder="Location" class="form__input" required value="{{profile.location}}">
+    
+        </div>
+        <div class="form__input-cont">
+            <label for="phone_number">Phone number</label>
+        <input type="text" name="phone_number" id="phone_number" placeholder="Phone number" class="form__input" required value="{{profile.phone_number}}">
+    
+        </div>
     </div>
     <div class="form__input-cont">
         <label for="bio">Bio</label>
         <textarea name="bio" id="bio" placeholder="Bio" class="form__input">{{profile.bio}}</textarea>
 
     </div>
-    <div class="form__input-cont">
-        <label for="location">Location</label>
-    <input type="text" name="location" id="location" placeholder="Location" class="form__input" required value="{{profile.location}}">
 
-    </div>
     <div class="submit__div">
          <button type="submit">Save</button>
 
     </div>
-        </form>
+    <div class=" padding flex">
+      <P class="">Who can view your friend list</P>
+      <select name="friend_visibility" id="friend_visibility" class="select">
+        <option>Choose visiblity</option>
+        <option value="public">Public</option>
+        <option value="private">Private</option>
+        <option value="friend-friend">
+          Friend of friend
+        </option>
+      </select>
     </div>
+        </form>
+        <div class="delete__account">
+            <p class="padding__bottom">Do you want to delete this account forever delete account ? </p>
+            <form action="">
+                <button class="delete_btn cursor_pointer">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    {% elif tab == "saved" %}
+    <h1 class="text-center">{{tab}}</h1>
+    <div class="grid grid-cols-4">
+        {% for saved in saved %}
+        <div class="padding margin__top bg-white rounded-sm h-300 w-300" onclick="window.location.href='../../post/{{saved.post.id}}'">
+          <div class="normal__flex post__div">
+            <a href="../../profile/{{saved.post.user}}">
+              <div class="flex gap-sm">
+                <img
+                  src="{{saved.post.profile.profile.url}}"
+                  alt="{{saved.post.user}}"
+                  class="profile__img"
+                />
+                <div>
+                  <h4 class="bg-white">{{saved.post.user}}</h4>
+                  <p>{{location}}</p>
+                </div>
+              </div>
+            </a>
+            <div class="relative add__friend">
+              <img
+                src="{% static 'assets/light/account.svg' %}"
+                alt="add friend"
+                srcset=""
+                class="icon account"
+              />
+              <p class="absolute icon__absolute">+</p>
+            </div>
+          </div>
+          <h4 class="padding__top padding__bottom">
+            {{saved.post.caption}} {{saved.post.created__at}}
+          </h4>
+          <img src="{{saved.post.image.url}}" class=" rounded-sm margin__top h-150 w-full" />
+          <div class="normal__flex padding__top padding__bottom">
+            <div class="flex">
+              <div class="like-comment flex align-center">
+                <div data-post-id="{{post.id}}" id="like" class="like">
+                  <img
+                    src="{% static 'assets/light/like.svg' %}"
+                    alt=""
+                    srcset=""
+                    class="icon like"
+                  />
+                </div>
+                {% if saved.post.no_of_like == 0 %}
+                <span data-post-id="{{saved.post.id}}" class="like_count"></span>
+                {% else %}
+                <span data-post-id="{{saved.post.id}}" class="like_count"
+                  >{{saved.post.no_of_like}}</span
+                >
+    
+                {% endif %}
+              </div>
+              <div
+                onclick="handleOpenComment('{{post.id}}')"
+                id="comment_div"
+                data-id="{{post.id}}"
+                class="flex gap-s"
+              >
+                <img
+                  src="{% static 'assets/light/comment.svg' %}"
+                  alt=""
+                  srcset=""
+                  class="icon comment_icon"
+                  id="comment"
+                />
+                
+                {% if saved.post.no_of_comments == 0 %}
+                  
+                {% else %}
+                <p id="comment_count">{{saved.post.no_of_comments}}</p>
+                {% endif %}
+                  
+                
+              </div>
+    
+              <img
+                src="{% static 'assets/light/share.svg' %}"
+                alt=""
+                srcset=""
+                class="icon share"
+                onclick="showShareModal('{{saved.post.id}}')"
+              />
+            </div>
+    
+            <img
+              src="{% static 'assets/light/save.svg' %}"
+              alt=""
+              srcset=""
+              class="icon save",
+              data-post_id="{{saved.post.id}}"
+              
+            />
+          </div>
+          <div
+            class="comment_model gap-sm bg-white"
+            data-comment-id="{{saved.post.id}}"
+            id="comment_div"
+    
+          >
+            <form
+              action=""
+              class="flex"
+              id="comment_form"
+              enctype="multipart/form"
+            >
+              <input
+                type="text"
+                class="comment_model_input bg-white"
+                name="comment"
+                id="{{saved.post.id}}"
+              />
+              <button class="comment">Comment</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+    </div>
+  
+      {% elif tab == "notification" %}
+      <h1 class="text-center">{{tab}}</h1>
+      <h3 class="text-center">
+        Customize the notification to receive
+      </h3>
+      <div class="flex-col gap-md padding__top">
+        <div class="flex padding__top">
+          <label class="switch">
+            <input type="checkbox" id="not_like">
+            <span class="slider round"></span>
+          </label>  
+          <label for="not_like">Receive the notification every time when someone like or dislike your video</label>
+  
+        </div>
+        <div class="flex padding__top">
+          <label class="switch">
+            <input type="checkbox" id="not_post">
+            <span class="slider round"></span>
+          </label>
+          <label for="not_post">Receive the notification every time when someone comment or reply to your post or reply to your comment</label>
+  
+        </div>
+        <div class="flex padding__top">
+          <label class="switch">
+            <input type="checkbox" id="not_rcv">
+            <span class="slider round"></span>
+          </label>
+          <label for="not_rcv">Receive notification also via email</label>
+  
+        </div>
+        <h4 class="text-center" >Customise email where you want to receive notification</h4>
+        <div class="flex justify-center">
+          <p class>{{user.email}}</p>
+          <button class="change_email">Change</button>
+        </div>
+        
+      </div>
 
+
+      {% elif tab == "activity_log" %}
+      <h1 class="text-center">Activity Log</h1>
+      <div class="flex-col gap-md padding ">
+        {% for activity in activity  %}
+        {% if activity.post %}
+
+        <div class="rounded-sm padding-sm  bg-gray " onclick="window.location.href='../../post/{{activity.post.id}}'">
+          <div class=" flex justify-end">
+            <p class="date_p">{{activity.date}}</p>
+            </div>
+            <div class="flex">
+              
+              {% if activity.post %}
+              <img src="{{activity.post.image.url}}" alt="" class="activity_img">
+                
+              {% endif %}
+               <p>{{activity.value}}</p>
+                
+            </div>
+        </div>
+        {% else %}
+        <div class="rounded-sm padding-sm  bg-gray ">
+          <div class=" flex justify-end">
+            <p class="date_p">{{activity.date}}</p>
+            </div>
+            <div class="flex">
+              
+              {% if activity.post %}
+              <img src="{{activity.post.image.url}}" alt="" class="activity_img">
+                
+              {% endif %}
+               <p>{{activity.value}}</p>
+                
+            </div>
+        </div>
+        {% endif %}
+
+        
+          
+        {% endfor %}
+      </div>
+     
+        
+
+    {% else %}
+    hello
+    {% endif %}
+  </div>
+</div>
+<script>
+  function handleOpenComment(post_id) {
+    let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
+    
+    $.ajax({
+      type:'GET',
+      url:'../../get_comment',
+      data:{
+        post_id:post_id
+      },
+      success:function(data){
+        console.log(data.comment)
+        
+
+        data.comment.map((data)=>$(comment).append('<div class="comment_profile relative"><div class="absolute comment_menu flex-col bg-white rounded-sm  right-0" data-comment-id="'+data.id+'""><div flex justify-center><button class="comment_menu_button comment_reply" data-comment-id="'+data.id+'" onclick="handleReply()">Reply</button></div> <div flex justify-center><button class="comment_menu_button comment_remove" data-comment-id="'+data.id+'" onclick="handleRemove()">Remove</button></div></div><div class="flex"><img src="'+data.user.profile+'" class="profile__msg_img"/><p>'+data.user.username+"</p></div><div class='comment_paragraph '><p>"+data.value+"</p><img src='{% static 'assets/light/menu.svg'%}' class='icon menu'/></div></div>"))
+        {% comment %} temp2='<div class="flex gap-sm margin__top__lg">{% if current_sender_friend %}<img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__msg_img" />{% else %}<img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__msg_img" />{% endif %}<div class="receive__message"><p>'+message.value+'</p></div></div>' {% endcomment %}
+        
+      }
+    })
+    if (comment.style.display == "flex"){
+      comment.style.display = "none";
+    }
+    else{
+      comment.style.display = "flex";
+      comment.style.flexDirection = "column";
+    }
+  
+
+    
+
+
+
+    $(document).on('submit','#comment_form',function(e){
+      let formData =new FormData()
+    formData.append('comment',$('#'+post_id).val())
+    formData.append('post_id',post_id)
+    formData.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val())
+    console.log(formData)
+      e.preventDefault()
+      $.ajax({
+        type:'POST',
+        url:'../../comment',
+        data:formData,
+        processData:false,
+        contentType:false,
+        success:function(data){
+          
+          $('#comment_count').text(data)
+           handleOpenComment(post_id)
+           let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
+           comment.style.display='flex'
+
+        }
+      })
+    })
+
+  }
+
+
+  function handleReply(){
+    $(document).ready(function(){$('.comment_reply').on('click',function(){
+      let postId=$(this).data('comment-id');
+      console.log(postId)
+      
+      $.ajax({
+        type:'GET',
+        url:"../../reply",
+        success:function(data){
+
+        alert(data)
+        }
+      })
+    })})
+  }
+  function handleRemove(){
+    $(document).ready(function(){$('.comment_remove').on('click',function(){
+      let id=$(this).data('comment-id');
+      console.log(id)
+      
+      $.ajax({
+        type:'GET',
+        url:"../../delete_comment",
+        data:{
+          comment_id:id
+        },
+        success:function(data){
+          $('#comment_count').text(data)
+        }
+      })
+    })})
+  }
+
+
+</script>
 
 {% endblock %}

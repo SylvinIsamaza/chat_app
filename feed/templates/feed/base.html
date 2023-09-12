@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <html lang="en">
@@ -8,11 +7,12 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}" />
 
     <link rel="stylesheet" href="{% static 'css/form.css' %}" />
-    <script src="{% static 'js/ajax.js' %}"></script> 
+    <link rel="shortcut icon" href="{% static 'assets/chat.svg'%}" type="image/x-icon">
+    <script src="{% static 'js/ajax.js' %}"></script>
   </head>
   <body>
-    <nav>
-      <ul>
+    <nav class="desktop_nav">
+      <ul class="bg-white">
         <div class="home">
           <a href="/" class="logo"> <li>Sociopedia</li></a>
           <li>{% include 'feed/search.html' %}</li>
@@ -23,21 +23,23 @@
             New Post
           </button>
           <img
-            src="{% static 'assets/sun.svg' %}"
+            src="{% static 'assets/light/sun.svg' %}"
             alt="sun"
-            class="nav__el"
+            class="icon sun"
             onclick="changeTheme()"
           />
-          <a href="/message"
-            ><img
-              src="{% static 'assets/chat.svg' %}"
-              alt="chat"
-              class="nav__el"
-          /></a>
+
           <img
-            src="{% static 'assets/notification.svg' %}"
+            src="{% static 'assets/light/chat.svg' %}"
+            alt="chat"
+            class="nav__el chat"
+            onclick="handleMessageModal()"
+          />
+          <img
+            src="{% static 'assets/light/notification.svg' %}"
             alt="notification"
-            class="nav__el"
+            class="nav__el notification"
+            onclick="handleNotification()"
           />
           <div>
             <img
@@ -53,7 +55,7 @@
 
     {% block content %} {%endblock %}
     <div class="model" onclick="handleClose()" id="model">
-      <div class="model_content">
+      <div class="model_content bg-white">
         <a href="/profile/{{user.username}}">
           <div class="flex">
             <img
@@ -65,28 +67,46 @@
             <h4>{{user.username}}</h4>
           </div>
         </a>
+        <div class="flex">
+          <img
+            src="{% static 'assets/light/settings.svg' %}"
+            alt=""
+            class="icon settings"
+          />
+          <a href="../../settings/account" class="logout">Settings</a>
+        </div>
 
         <div class="flex">
-          <a href="/logout" class="logout">Logout</a>
+          <img
+            src="{% static 'assets/light/logout.svg' %}"
+            alt=""
+            class="icon logout"
+          />
+          <a href="../../logout" class="logout">Logout</a>
         </div>
       </div>
     </div>
     <div class="model" id="upload__model">
-      <div class="model_content__upload">
+      <div class="model_content__upload bg-white">
         <div class="justify-end" onclick="handleCloseUpload()">
           <img
-            src="{%static 'assets/close.svg' %}"
+            src="{%static 'assets/light/close.svg' %}"
             alt="close"
-            class="icon"
+            class="icon close"
             title="close"
           />
         </div>
-        <form method="POST" enctype="multipart/form-data"  id="upload-form">
+        <form method="POST" enctype="multipart/form-data" id="upload-form">
           {% csrf_token %}
           <h4>Upload Pics</h4>
-          <label class="upload__container" for="upload_input" title="upload" id="upload_container">
+          <label
+            class="upload__container bg-gray"
+            for="upload_input"
+            title="upload"
+            id="upload_container"
+          >
             <img
-              src="{% static 'assets/upload.svg' %}"
+              src="{% static 'assets/light/upload.svg' %}"
               alt=""
               class="icon__lg"
               id="profile-image"
@@ -116,34 +136,46 @@
         </form>
       </div>
     </div>
+    {% comment %} this is the message model {% endcomment %}
+    <div class="model" id="message_model" onclick="closeMessageModal()">
+      <div class="model_content">
+        <div class="flex"></div>
+      </div>
+    </div>
     {% comment %} mobile navigation bar {% endcomment %}
-    <nav id="mobile_nav">
-      <ul>
+    <nav class="mobile_nav">
+      <ul class="bg-white">
         <div class="home">
           <a href="/" class="logo"> <li>Sociopedia</li></a>
-          <li>{% include 'feed/search.html' %}</li>
         </div>
-
         <div class="home">
-          <button class="new__post" onclick="showUploadModal()">
-            New Post
+          <li>{% include 'feed/search.html' %}</li>
+          <button class="rounded-full search">
+            <img
+              src="{% static 'assets/light/search.svg' %}"
+              alt=""
+              class="icon search_icon"
+            />
           </button>
+
+          <button
+            class="new__post flex justify-center"
+            onclick="showUploadModal()"
+          >
+            +
+          </button>
+
           <img
-            src="{% static 'assets/sun.svg' %}"
-            alt="sun"
-            class="nav__el"
-            onclick="changeTheme()"
+            src="{% static 'assets/light/chat.svg' %}"
+            alt="chat"
+            class="nav__el chat"
+            onclick="handleMessageModal()"
           />
-          <a href="/message"
-            ><img
-              src="{% static 'assets/chat.svg' %}"
-              alt="chat"
-              class="nav__el"
-          /></a>
           <img
-            src="{% static 'assets/notification.svg' %}"
+            src="{% static 'assets/light/notification.svg' %}"
             alt="notification"
-            class="nav__el"
+            class="nav__el notification"
+            onclick="handleNotification()"
           />
           <div>
             <img
@@ -156,28 +188,81 @@
         </div>
       </ul>
     </nav>
-    <script >
-      
-$(document).on('submit','#upload-form',function(e){
-  post_img=document.getElementById('upload_input').files[0]
-  e.preventDefault()
-  let formData =new FormData()
-  formData.append('caption',$('#upload_caption').val())
-  formData.append('post_img',$('#upload_input')[0].files[0])
-  formData.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val())
-  $.ajax({
-    type:"POST",
-    url:"../../upload_post",
-    data: formData,
-    processData:false,
-    contentType:false,
-    success:function(data){
-     alert(data)
-     console.log(post_img)
-    }
-  })
+    <div class="notification__model" id="notification__model">
+      <div class="justify-end">
+        <div class="bg-white padding rounded-sm" id="notification_cont"></div>
+      </div>
+    </div>
+    <script>
+      $(document).on("submit", "#upload-form", function (e) {
+        post_img = document.getElementById("upload_input").files[0];
+        e.preventDefault();
+        let formData = new FormData();
+        formData.append("caption", $("#upload_caption").val());
+        formData.append("post_img", $("#upload_input")[0].files[0]);
+        formData.append(
+          "csrfmiddlewaretoken",
+          $('input[name="csrfmiddlewaretoken"]').val()
+        );
+        $.ajax({
+          type: "POST",
+          url: "../../upload_post",
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (data) {
+            alert(data);
+            console.log(post_img);
+          },
+        });
+      });
+      function handleCloseNotification(){
+        document.getElementById("notification_cont").style.display = "none"
+        document.getElementById("notification__model").style.display="none"
+      }
+      function handleNotification() {
+        if (
+          document.getElementById("notification_cont").style.display == "none"
+          
+        ) {
+          document.getElementById("notification__model").style.display =
+            "block";
 
-})
+          $.ajax({
+            type: "GET",
+            url: "../../get_notification",
+            success: function (data) {
+              $("#notification_cont").empty();
+              if (data.notification.length==0){
+                $("#notification_cont").append(
+                  '<div class="padding"><div class="flex date_p "><h1 class="text-center">No notification</h1></div></div>'
+                );
+              }
+              
+              data.notification.map((notification) => {
+                if (notification.post) {
+                  $("#notification_cont").append(
+                    '<div class="padding"><div class="flex date_p justify-end">' +
+                      notification.date +
+                      '</div><div class="flex"><img class="profile__img" src=' +
+                      notification.profile.image +
+                      "/><p>" +
+                      notification.value +
+                      "</p></div></div>"
+                  );
+                }
+              });
+              handleClose()
+              handleCloseUpload()
+              document.getElementById("notification_cont").style.display =
+                "block";
+            },
+          });
+        } else {
+          document.getElementById("notification_cont").style.display = "none";
+          document.getElementById("notification__model").style.display="none";
+        }
+      }
     </script>
     <script src="{% static 'js/theme.js' %}"></script>
     <script src="{% static 'js/change.js' %}"></script>

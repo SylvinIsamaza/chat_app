@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view,get_messages,send_message,upload_post,upload_comment_view,get_comment_view,upload_reply,upload_reply_to_reply,get_replies,get_replies_of_replies,save,get_saved_post
+from feed.views import signup_view, homepage_view, login_view, logout, setting_view,message_view,like_view,profile_view,friend_view,confirm_friend_view,delete_friend_view,search_view,get_messages,send_message,upload_post,upload_comment_view,get_comment_view,upload_reply,upload_reply_to_reply,get_replies,get_replies_of_replies,save,get_saved_post,message_page_view,get_notification,delete_comment,share,post_page
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,7 +24,7 @@ urlpatterns = [
     path('signup/', signup_view, name='sign up'),
     path('login/', login_view, name='Login'),
     path('logout/', logout, name='Logout'),
-    path('settings/', setting_view, name='Setting'),
+    path('settings/<str:tab>', setting_view, name='Setting'),
     path('profile/<str:username>', profile_view, name='Profile'),
     path('like', like_view, name='Like'),
     path('confirm_friend/', confirm_friend_view, name='confirm friend'),
@@ -37,13 +37,18 @@ urlpatterns = [
     path('get_comment',get_comment_view,name="Get comment"),
     
     path('message/<str:username>', message_view, name='Message'),
+    path('message/', message_page_view, name='Message'),
+    path('share',share,name="share"),
     path('reply',upload_reply, name='Crete Reply'),
     path('get_reply',get_replies, name='get replies'),
     path('reply_to_reply',upload_reply_to_reply, name='Reply to reply'),
     path('get_reply_to_reply',get_replies_of_replies, name='get Reply to reply'),
     path('save',save,name="Save post"),
     path('add_friend/', friend_view, name='Add friend'),
-    path('', homepage_view, name='homepage')
+    path('', homepage_view, name='homepage'),
+    path('get_notification',get_notification,name="notification"),
+    path('delete_comment',delete_comment,name="Delete comment"),
+    path('post/<str:id>',post_page,name="Post page")
 
 ]
 urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

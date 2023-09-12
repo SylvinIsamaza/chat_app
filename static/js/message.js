@@ -25,6 +25,7 @@ $(document).ready(function () {
 
 })
 
+
 // {% for message in messages%}
         
 //         {% if message.sender.username == request.user.username %}

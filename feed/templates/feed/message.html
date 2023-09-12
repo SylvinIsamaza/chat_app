@@ -1,46 +1,36 @@
 {% extends 'feed/base.html' %} {% load static%} {% block content %}
 <div class="normal__flex gap-sm justify-center" id='cont'>
   <div class="friend__list flex-col bg-white rounded-sm padding" id="friend__list">   
-    {% for friend in friends %}
-    <div class=" margin__top bg__white rounded-sm post_container">
-      <div class="normal__flex post__div">
-        {% if friend.user.username == user.username%}
-        <div class="flex gap-sm">
-       <a href="../../message/{{friend.sender_profile.user}}">
-        <img
-        src="{{friend.sender_profile.profile.url}}"
-        alt="{{user.username}}"
-        class="profile__img"
-      />
-      <div>
-        
-        <p>{{friend.friend_username}}</p>
-        <p>{{friend.sender_profile.friends}} Friends</p>
-       </a>  
-            {% else%}
-            <div class="flex gap-sm">
-              <a href="../../message/{{friend.receiver_profile.user}}">
-                <img
-                src="{{friend.receiver_profile.profile.url}}"
-                alt="{{user.username}}"
-                class="profile__img"
-              />
-              <div>
-                
-                <p>{{friend.user.username}}</p>
-                <p>{{friend.receiver_profile.friends}} Friends</p>
-               </a> 
-            {% endif %}
-          </div>
+    {% for message in messages  %}
+    <a href="../../message/{{message.user.username}}" class="bg-white">
+     <div class="flex padding__top padding__bottom">
+       <img
+         src="{{message.profile.profile.url}}"
+         alt="{{user.username}}"
+         class="profile__img"
+       />
+       <div>
+         <h4>{{message.user.username}}</h4>
          
-        </div>
-      </div>
-    </div>
+         {% if message.messages.user.username == user.username %}
+         <p class="truncate gray">You:{{message.messages.value}}</p>
+           
+         {% else %}
+         <p class="truncate">{{message.messages.value}}</p>
+         
+           
+         {% endif %}
+           
+        
+       </div>
+     </div>
+    </a>
+
     {% endfor %}
   </div>
   <div class="message_cont bg-white rounded-sm">
     <div class="normal__flex bg-white rounded-sm padding">
-     <a href="../../profile/{{username}}">
+     <a href="../../profile/{{username}}" class="bg-white">
       <div class="flex">
         
         {% if current_sender_friend %}
@@ -50,15 +40,15 @@
         {% endif %}
           
         
-        <p>{{username}}</p>
+        <p class="bg-white">{{username}}</p>
       </div>
 
      </a> 
-      <img src="{% static 'assets/menu.svg' %}" alt="" class="icon">
+      <img src="{% static 'assets/light/menu.svg' %}" alt="" class="icon">
      
     </div>
-    <div class="message_chat_room gap">
-      <div class="message_cont rounded-sm" id="message_cont">
+    <div class="message_chat_room   gap">
+      <div class="message_cont bg-gray rounded-sm" id="message_cont">
         
       </div>
       <form  id="message-form">
@@ -67,11 +57,11 @@
       <input type="hidden" name="username" id="username" value="{{user.username}}">
       <input type="hidden" name="room" id="room" value="{{current_room}}">
         <button class="absolute send__absolute" title="send" type="submit" id="submit_button">
-          <img src="{% static 'assets/send.svg' %}" alt="send" class="icon">  
+          <img src="{% static 'assets/light/send.svg' %}" alt="send" class="icon">  
         </button>
         <label for="file_upload">
           <div class="absolute attach__absolute" title="Attach">
-            <img src="{% static 'assets/attach.svg' %}" alt="send" class="icon">  
+            <img src="{% static 'assets/light/attach.svg' %}" alt="send" class="icon">  
           </div>
         </label>
         <input type="file" id="file_upload" name="file_upload" class="hidden">
@@ -112,10 +102,10 @@
           $('#message_cont').empty()
           console.log(response.messages)
   
-         
+          
           response.messages.map((message)=>{
-            temp='<div class=""><div class="sender_message-cont"><div class="justify-end  margin__top__lg gap-sm"><p class="user_title">'+message.sender.username+'</p><div class="send__message"><p>'+message.value+'</p></div><img src="{{profile.profile.url}}" alt="+{{profile.user}}+"class="profile__msg_img"></div></div></div>'
-          temp2='<div class="flex gap-sm margin__top__lg">{% if current_sender_friend %}<img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__msg_img" />{% else %}<img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__msg_img" />{% endif %}<div class="receive__message"><p>'+message.value+'</p></div></div>'
+            temp='<div class=""><div class="sender_message-cont"><div class="justify-end  margin__top__lg gap-sm"><p class="user_title bg-white">'+message.sender.username+'</p><div class="send__message"><p>'+message.value+'</p></div><img src="{{profile.profile.url}}" alt="+{{profile.user}}+"class="profile__msg_img"></div></div></div>'
+          temp2='<div class="flex gap-sm received margin__top__lg">{% if current_sender_friend %}<img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__msg_img" />{% else %}<img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__msg_img" />{% endif %}<div class="receive__message"><p>'+message.value+'</p></div></div>'
           
              if (message.sender.username == "{{request.user.username}}"){
             $('#message_cont').append(temp)
@@ -123,13 +113,18 @@
             else{ 
             $('#message_cont').append(temp2)
             } 
+            
           })
+
+           
         }
       })
     },1000)
 
   
   })
+  
+
 </script>
   
 {% endblock %}

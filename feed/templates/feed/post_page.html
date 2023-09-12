@@ -1,0 +1,424 @@
+{% include 'feed/base.html' %}
+{% load static %}
+<div class=" padding padding__top-lg  gap-md post_main_container">
+  <div class="overflow-auto">
+    <div class="padding bg-white rounded-sm main_post_container ">
+      <div class="normal__flex post__div">
+        <a href="../../profile/{{post.user}}">
+          <div class="flex gap-sm">
+            <img
+              src="{{post.profile.profile.url}}"
+              alt="{{user.username}}"
+              class="profile__img"
+            />
+            <div>
+              <h4 class="bg-white">{{post.user}}</h4>
+              <p>{{location}}</p>
+            </div>
+          </div>
+        </a>
+        <div class="relative add__friend">
+          <img
+            src="{% static 'assets/light/account.svg' %}"
+            alt="add friend"
+            srcset=""
+            class="icon account"
+          />
+          <p class="absolute icon__absolute">+</p>
+        </div>
+      </div>
+      <h4 class="padding__top padding__bottom">
+        {{post.caption}} {{post.created__at}}
+      </h4>
+      <img src="{{post.image.url}}" class="w-full rounded-sm margin__top" />
+      <div class="normal__flex">
+        <div data-post-id="{{post.id}}" class="liked-by">
+          <div class="flex">
+            {% for like in post.liked_by %}
+            
+            {% if forloop.counter == 1 %}
+            <p class="blue capitalise">{{like.username}}</p>
+            {% else %}
+  
+            <p class="capitalise">{{like.username}}</p>
+              
+            {% endif %}
+              
+            
+            {% endfor %}
+          </div>
+  
+            
+  
+        </div>
+        <p  data-post-id="{{post.id}}" class="saved_info"></p>
+      </div>
+      <div class="normal__flex padding__top padding__bottom">
+        <div class="flex">
+          <div class="like-comment flex align-center">
+            <div data-post-id="{{post.id}}" id="like" class="like">
+              <img
+                src="{% static 'assets/light/like.svg' %}"
+                alt=""
+                srcset=""
+                class="icon like"
+              />
+            </div>
+            {% if post.no_of_like == 0 %}
+            <span data-post-id="{{post.id}}" class="like_count"></span>
+            {% else %}
+            <span data-post-id="{{post.id}}" class="like_count"
+              >{{post.no_of_like}}</span
+            >
+  
+            {% endif %}
+          </div>
+          <div
+            onclick="handleOpenComment('{{post.id}}')"
+            id="comment_div"
+            data-id="{{post.id}}"
+            class="flex gap-s"
+          >
+            <img
+              src="{% static 'assets/light/comment.svg' %}"
+              alt=""
+              srcset=""
+              class="icon comment_icon"
+              id="comment"
+            />
+            
+            {% if post.no_of_comments == 0 %}
+              
+            {% else %}
+            <p id="comment_count">{{post.no_of_comments}}</p>
+            {% endif %}
+              
+            
+          </div>
+  
+          <img
+            src="{% static 'assets/light/share.svg' %}"
+            alt=""
+            srcset=""
+            class="icon share"
+            onclick="showShareModal('{{post.id}}')"
+          />
+        </div>
+  
+        <img
+          src="{% static 'assets/light/save.svg' %}"
+          alt=""
+          srcset=""
+          class="icon save",
+          data-post-id="{{post.id}}"
+          
+        />
+      </div>
+  
+    </div>
+  </div>
+
+  <div
+  class="comment_model_post gap-sm bg-white rounded-sm"
+  data-comment-id="{{post.id}}"
+  id="comment_div"
+
+>
+  <form
+    action=""
+    class="flex"
+    id="comment_form"
+    enctype="multipart/form"
+  >
+    <input
+      type="text"
+      class="comment_model_input bg-white"
+      name="comment"
+      id="{{post.id}}"
+    />
+    <button class="comment">Comment</button>
+  </form>
+</div>
+<div id="share_container" class="justify-center align-center" method='post' action="../../share">
+  <div class="bg-white padding rounded-sm share_container_content">
+    <div class="justify-end padding__bottom">
+      <img src="{% static 'assets/light/close.svg' %}" alt="" class="icon close" onclick="closeShareModal()">
+    </div>
+    
+    {%  if len_friend == 0 %}
+      
+    {% else %}
+    <div class="search__div" id="search">
+      {%  csrf_token %}
+      <input type="search" placeholder="Search here ..." name="search" id='share_input' value="{{friend.user.username}}">
+      <form id="share_form">
+      <input type="hidden" name="post" id="post-share-id" >
+
+      <img src="{% static 'assets/light/search.svg' %}" class=" icon absolute left-0 search">
+    </div>
+    <h4 class="padding__top">Select friends</h4>
+  
+      {% for friend in friends %}
+<div class="margin__top bg-white rounded-sm post_container">
+  <div class="flex share_friends">
+    {% if friend.user.username == user.username%}
+    <div class="flex search_friends" >
+      <input type="checkbox" name="{{forloop.counter}}" id="{{forloop.counter}}" value="{{friend.friend_username}}">
+       <label id="{{forloop.counter}}" class="bg-white" >
+      <div class="flex gap-sm">
+        <img
+          src="{{friend.sender_profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <p>{{friend.friend_username}}</p>
+          <p>{{friend.sender_profile.friends}} Friends</p>
+        </label>
+    </div>
+   
+    {% else%}
+    <div class="flex search_friends">
+      <input type="hidden" name="post" id="post-share-id" >
+      <input type="checkbox" name="{{forloop.counter}}" id="{{forloop.counter}}">
+       <label id="{{forloop.counter}}" class="bg-white">
+      <div class="flex gap-sm">
+        <img
+          src="{{friend.receiver_profile.profile.url}}"
+          alt="{{user.username}}"
+          class="profile__img"
+        />
+        <div>
+          <p>{{friend.user.username}}</p>
+          <p>{{friend.receiver_profile.friends}} Friends</p>
+        </label>
+    </div>
+              {% endif %}
+            </div>
+          </div>
+        </label>
+      </div>
+    </div>
+    {% endfor%}
+    {% endif %}
+    <div class="justify-end">
+      <button class='flex align-center' id="share_button">
+       Share <img src="{% static 'assets/light/share2.svg' %}" alt="" class='icon'>
+
+      </button>
+    </div>
+    
+  </div>
+    </form>
+    
+
+    
+    
+      
+
+  
+</div>
+</div>
+
+
+<script>
+  $(document).ready(function(){$('.like').on('click',function(){
+    let postId=$(this).data('post-id');
+    console.log(postId)
+    $.ajax({
+      type:'POST',
+      url:"../../like",
+      data:{
+        post_id:postId,
+        csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success:function(data){
+
+        $('.like_count[data-post-id="'+postId+'"]').text(data)
+      }
+    })
+  })})
+  $(document).ready(function(){$('.save').on('click',function(){
+    let postId=$(this).data('post-id');
+    console.log(postId)
+    $.ajax({
+      type:'POST',
+      url:"../../save",
+      data:{
+        post_id:postId,
+        csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success:function(data){
+        $('.saved_info[data-post-id="'+postId+'"]').text(data)
+        function hideMessage(){
+        $('.saved_info[data-post-id="'+postId+'"]').text("")
+          
+        }
+      setTimeout(()=>hideMessage(),5000)
+
+        
+      }
+    })
+  })})
+
+  $(document).ready(function(){$('.share').on('click',function(){
+    let postId=$(this).data('post_id');
+    console.log(postId)
+    $.ajax({
+      type:'POST',
+      url:"../../save",
+      data:{
+        post_id:postId,
+        csrfmiddlewaretoken:$('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success:function(data){
+
+        alert(data)
+      }
+    })
+  })})
+
+
+function handleOpenComment(post_id) {
+    let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
+    
+    $.ajax({
+      type:'GET',
+      url:'../../get_comment',
+      data:{
+        post_id:post_id
+      },
+      success:function(data){
+        console.log(data.comment)
+        
+
+        data.comment.map((data)=>$(comment).append('<div class="comment_profile relative"><div class="absolute comment_menu flex-col bg-white rounded-sm  right-0" data-comment-id="'+data.id+'""><div flex justify-center><button class="comment_menu_button comment_reply" data-comment-id="'+data.id+'" onclick="handleReply()">Reply</button></div> <div flex justify-center><button class="comment_menu_button comment_remove" data-comment-id="'+data.id+'" onclick="handleRemove()">Remove</button></div></div><div class="flex"><img src="'+data.user.profile+'" class="profile__msg_img"/><p>'+data.user.username+"</p></div><div class='comment_paragraph '><p>"+data.value+"</p><img src='{% static 'assets/light/menu.svg'%}' class='icon menu'/></div></div>"))
+        {% comment %} temp2='<div class="flex gap-sm margin__top__lg">{% if current_sender_friend %}<img src="{{current_sender_friend.sender_profile.profile.url}}" alt="" class="profile__msg_img" />{% else %}<img src="{{current_receiver_friend.receiver_profile.profile.url}}" alt="" class="profile__msg_img" />{% endif %}<div class="receive__message"><p>'+message.value+'</p></div></div>' {% endcomment %}
+        
+      }
+    })
+    if (comment.style.display == "flex"){
+      comment.style.display = "none";
+    }
+    else{
+      comment.style.display = "flex";
+      comment.style.flexDirection = "column";
+    }
+  
+
+    
+
+
+
+    $(document).on('submit','#comment_form',function(e){
+      let formData =new FormData()
+    formData.append('comment',$('#'+post_id).val())
+    formData.append('post_id',post_id)
+    formData.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val())
+    console.log(formData)
+      e.preventDefault()
+      $.ajax({
+        type:'POST',
+        url:'../../comment',
+        data:formData,
+        processData:false,
+        contentType:false,
+        success:function(data){
+          
+          $('#comment_count').text(data)
+           handleOpenComment(post_id)
+           let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
+           comment.style.display='flex'
+
+        }
+      })
+    })
+
+  }
+
+  handleOpenComment('{{post.id}}')
+
+  function handleReply(){
+    $(document).ready(function(){$('.comment_reply').on('click',function(){
+      let postId=$(this).data('comment-id');
+      console.log(postId)
+      
+      $.ajax({
+        type:'GET',
+        url:"../../reply",
+        success:function(data){
+
+        alert(data)
+        }
+      })
+    })})
+  }
+  function handleRemove(){
+    $(document).ready(function(){$('.comment_remove').on('click',function(){
+      let id=$(this).data('comment-id');
+      console.log(id)
+      
+      $.ajax({
+        type:'GET',
+        url:"../../delete_comment",
+        data:{
+          comment_id:id
+        },
+        success:function(data){
+          $('#comment_count').text(data)
+        }
+      })
+    })})
+  }
+
+let share_input=document.getElementById('share_input')
+let search_friends=document.getElementById('search_friend')
+
+function handleSearchShare(){
+value=share_input.value
+console.log(value)
+let messages=document.querySelectorAll('.search_friends')
+console.log(messages)
+messages.forEach((message)=>{
+search=message.querySelector('p').textContent.toLowerCase()
+console.log(search)
+
+if (search.indexOf(value)!=-1){
+  message.style.display="flex"
+ }
+ else{
+  message.style.display="none"
+ }
+
+
+})
+}
+share_input.addEventListener('keyup',handleSearchShare)
+
+$(document).on('submit','#share_form',function(e){
+let formData =new FormData()
+formData.append('comment',$('#'+post_id).val())
+formData.append('post_id',post_id)
+formData.append('csrfmiddlewaretoken',$('input[name="csrfmiddlewaretoken"]').val())
+console.log(formData)
+e.preventDefault()
+$.ajax({
+type:'POST',
+url:'../../comment',
+data:formData,
+processData:false,
+contentType:false,
+success:function(data){
+  
+  $('#comment_count').text(data)
+   handleOpenComment(post_id)
+   let comment = document.querySelector(' [data-comment-id="' + post_id + '"]');
+   comment.style.display='flex'
+
+}
+})
+})
+
+
+
+</script>

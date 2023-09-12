@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, auth
 from django.shortcuts import render, redirect, get_object_or_404
 import random
-from .models import Profile, Post, Friend,Like_post,Room,Message,User_Room,Comment,Saved_Post,Reply_Reply,Saved_Post,Shared_Post
+from .models import Profile, Post, Friend,Like_post,Room,Message,User_Room,Comment,Saved_Post,Reply_Reply,Saved_Post,Shared_Post,Notification,Activity
 from .utils.friend import make_friend, confirm_friend, delete_friend
 from .utils.like import like_post
 from django.http import JsonResponse,HttpResponse
 import threading
-
+from datetime import datetime,timedelta
 # Create your views here.
 
 def signup_view(request):
@@ -56,17 +56,57 @@ def homepage_view(request):
     friends=Friend.objects.all()
     posts_list=list()
     posts=list()
+    rooms=list()
+    message_list=list()
+
+    all_rooms=list()
+    user_room=User_Room.objects.filter(user=request.user)
+    for room in user_room:
+        rooms.append(room.room)
+    for room in rooms:
+        friend_in_room=User_Room.objects.filter(room=room)
+        for friend_room in friend_in_room:
+            if friend_room.user!=request.user:
+                
+                messages=Message.objects.filter(room=friend_room.room).order_by('-date').first()
+               
+                message_values=messages
+
+                    
+                message_list.append({
+                    "user":friend_room.user,
+                    "profile":Profile.objects.get(user=friend_room.user),
+                    "messages":message_values
+                })
+                all_rooms.append(friend_room)
+        
+
+    
+   
     for friend in friends:
 
         posts.append(Post.objects.filter(user = friend.friend_username).order_by('-createdAt'))
         posts.append(Post.objects.filter(user = friend.user.username).order_by('-createdAt'))
         posts.append(Post.objects.filter(user=request.user.username).order_by('-createdAt'))
 
-
+    
     friend_requests = Friend.objects.filter(is_complete=False, user=request.user)
     for post in posts:
         for semi_post in post:
-            posts_list.append(semi_post)
+            liked_by_list=list()
+            like_lists=Like_post.objects.filter(post_id=semi_post.id)
+            for like_list in like_lists:
+               print(like_list)
+               liked_by_list.append(like_list)
+               
+          
+            
+            posts_list.append({"id":semi_post.id,"user":semi_post.user,"profile":semi_post.profile,"image":semi_post.image,"caption":semi_post.caption,'createdAt':semi_post.createdAt,"no_of_like":semi_post.no_of_like,"no_of_comments":semi_post.no_of_comments,"no_of_shares":semi_post.no_of_shares,"liked_by":liked_by_list})
+            # print({"id":semi_post.id,"user":semi_post.user,"profile":semi_post.profile,"image":semi_post.image,"caption":semi_post.caption,'createdAt':semi_post.createdAt,"no_of_like":semi_post.no_of_like,"no_of_comments":semi_post.no_of_comments,"no_of_shares":semi_post.no_of_shares,"liked_by":liked_by_list})
+                    
+            
+            
+            
 
     like=Like_post.objects.filter(username=request.user)
     friends=list()
@@ -79,6 +119,7 @@ def homepage_view(request):
         for friend in frnd_possblty_2:
             friends.append(friend)
     print(friends)
+    
     context = {
         "user": user_profile.user,
         "profile": user_profile,
@@ -88,7 +129,9 @@ def homepage_view(request):
         "len_post":len_post,
         "len_like":int(len(like)),
         "friends":friends[:4],
-        "len_friends":len(friends)
+        "len_friends":len(friends),
+        "messages":message_list
+        
     }
 
 
@@ -124,11 +167,32 @@ def logout(request):
 
 
 @login_required(login_url="/login")
-def setting_view(request):
+def setting_view(request,tab):
     user_profile = Profile.objects.get(user=request.user)
+    saved=Saved_Post.objects.filter(user=request.user)
+    activity_list=list()
+    
+    def check_date(date1):
+        date1=datetime.strptime(str(date1)[:10], '%Y-%m-%d')
+        date2=datetime.strptime(str(datetime.now())[:10], '%Y-%m-%d')
+        delta=date2-date1
+        if date2==date1:
+            return 'Today'
+        elif date1==date2-timedelta(days=1):
+            return 'yesterday'
+        else:
+            return str(date1)[:10]
+    activities=Activity.objects.filter(user=request.user)
+    for activity in activities:
+        if activity.post_id:
+            activity_list.append({"value":activity.value,"post":Post.objects.get(id=activity.post_id),"date":check_date(activity.date),"user":activity.user})
     context = {
         "user": user_profile.user,
-        "profile": user_profile
+        "profile": user_profile,
+        "tab":tab,
+        "saved":saved,
+        "activity":activity_list
+        
     }
     if request.method == "POST":
         if request.FILES.get('profile') is None:
@@ -208,7 +272,59 @@ def message_view(request,username):
 
         
   
+        rooms=list()
+    message_list=list()
+
+    all_rooms=list()
+    user_room=User_Room.objects.filter(user=request.user)
+    for room in user_room:
+        rooms.append(room.room)
+    for room in rooms:
+        friend_in_room=User_Room.objects.filter(room=room)
+        for friend_room in friend_in_room:
+            if friend_room.user!=request.user:
+                
+                messages=Message.objects.filter(room=friend_room.room).order_by('-date').first()
+               
+                message_values=messages
+
+                
+                message_list.append({
+                    "user":friend_room.user,
+                    "profile":Profile.objects.get(user=friend_room.user),
+                    "messages":message_values
+                })
+
+                all_rooms.append(friend_room)
+   
+    for friend in friends:
+        print(friend.sender_profile.user)   
+        if friend.sender_profile==Profile.objects.get(user=User.objects.get(username=username)) :
+            for message in message_list:
+                if message['user']!=friend.sender_profile.user:
+                    
+                    message_list.append({
+                            "user":friend.friend_username,
+                            "profile":Profile.objects.get(user=User.objects.get(username=username)),
+                            "messages":{
+                                "value":"Be first to say Hi"
+                            }
+                        })
             
+        if friend.receiver_profile==Profile.objects.get(user=User.objects.get(username=username)):
+            print(friend.receiver_profile.user) 
+            for message in message_list:
+                    if message['user']!=friend.receiver_profile.user:
+                        
+                        message_list.append({
+                                "user":friend.friend_username,
+                                "profile":Profile.objects.get(user=User.objects.get(username=username)),
+                                "messages":{
+                                    "value":"Be first to say Hi"
+                                }
+                            })
+
+        
     
     context = {
         "user": user_profile.user,
@@ -218,6 +334,7 @@ def message_view(request,username):
         "current_sender_friend":current_sender_friend,
         "current_receiver_friend":current_receiver_friend,
         "current_room":current_room,
+        "messages":message_list
         
         
         
@@ -235,8 +352,9 @@ def like_view(request):
 
     post_id = request.POST['post_id']
 
-    like_post(username, post_id)
+    like_post(request,username, post_id)
     post_like=Post.objects.get(id=post_id)
+
     return HttpResponse(post_like.no_of_like)
 
 
@@ -265,10 +383,17 @@ def profile_view(request, username):
     for friend in friends:
 
         if request.user.username == friend.friend_username or request.user.username == friend.user.username:
-            isFriend = True
+            if friend.is_complete:
+                isFriend = True
+            else:
+                isFriend="pending"
+        else:
+            isFriend=False
+                
     if user_post:
         for post in user_post:
             latest_post = post
+    print(isFriend)
     context = {
         "user": request.user,
         "profile": profile,
@@ -369,7 +494,7 @@ def get_messages(request,username):
 
 
     
-    
+@login_required(login_url='/login')  
 def send_message(request):
     if request.method =='POST':
         room=request.POST['room']
@@ -397,7 +522,7 @@ def send_message(request):
                 User_Room.objects.create(room=Room.objects.get(name=room),user=User.objects.get(username=username))
                 User_Room.objects.create(room=Room.objects.get(name=room),user=request.user)
     return HttpResponse("Message sent successfully")
-
+@login_required(login_url='/login') 
 def upload_post(request):
     user_profile = Profile.objects.get(user=request.user)
     if request.method == 'POST':
@@ -414,7 +539,7 @@ def upload_post(request):
                             profile=Profile.objects.get(user=request.user))
         print(image)
     return HttpResponse("post uploaded successfully")
-
+@login_required(login_url='/login') 
 def upload_comment_view(request):
     if request.method == 'POST':
         comment=request.POST.get('comment')
@@ -430,7 +555,7 @@ def upload_comment_view(request):
         post.save()
         
     return HttpResponse(post.no_of_comments)
-
+@login_required(login_url='/login') 
 def get_comment_view(request):
     comment_list=list()
     if request.method == 'GET':
@@ -438,7 +563,7 @@ def get_comment_view(request):
         print(post_id)
         comments=Comment.objects.filter(post=Post.objects.get(id=post_id))
         for comment in comments:
-            comment_list.append({"value":comment.value,"post":{
+            comment_list.append({"id":comment.id,"value":comment.value,"post":{
                 "id":comment.post.id,
                 "user":comment.post.user,
             
@@ -452,7 +577,7 @@ def get_comment_view(request):
         
     return JsonResponse({"comment":comment_list})
         
-        
+@login_required(login_url='/login')        
 def upload_reply(request):
     reply_list=list()
     if request.method=='POST':
@@ -469,8 +594,21 @@ def upload_reply(request):
         post.save()
         for reply in replies:
             reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"comment":{"id":reply.comment.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
-        return JsonResponse({"replies":reply_list})
+    return JsonResponse({"replies":reply_list})
 
+@login_required(login_url='/login') 
+def delete_comment(request):
+    id=request.GET['comment_id']
+    comment=Comment.objects.get(id=id)
+    post=comment.post
+    post.no_of_comments=post.no_of_comments-1
+    post.save()
+    comment.delete()
+   
+
+    return HttpResponse(post.no_of_comments)
+
+@login_required(login_url='/login')    
 def get_replies(request):
     reply_list=list()
     
@@ -484,7 +622,7 @@ def get_replies(request):
             reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"comment":{"id":reply.comment.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
     return JsonResponse({"replies":reply_list})
 
-
+@login_required(login_url='/login') 
 def upload_reply_to_reply(request):
     if request.method == "POST":
         reply_id = request.POST.get('reply_id')
@@ -510,21 +648,25 @@ def get_replies_of_replies(request):
             reply_list.append({"value":reply.value,"user":{"username":reply.user.username},"reply":{"id":reply.reply.id},"post":{"id":reply.post.id},"profile":Profile.objects.get(user=reply.user)})
     return JsonResponse({"replies":reply_list})
 
-
+@login_required(login_url='/login') 
 def save(request):
     saved_list=list()
     if request.method=='POST':
         user=request.user,
         post_id=request.POST['post_id']
+        post_already_exist=Saved_Post.objects.filter(post=Post.objects.get(id=post_id),user=request.user)
+        if not post_already_exist:
         
-        Saved_Post.objects.create(user=request.user,post=Post.objects.get(id=post_id))
-        saved_posts=Saved_Post.objects.filter(post=Post.objects.get(id=post_id))
-        print(saved_posts)  
-        for saved_post in saved_posts:
-            saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
+            Saved_Post.objects.create(user=request.user,post=Post.objects.get(id=post_id))
+            saved_posts=Saved_Post.objects.filter(post=Post.objects.get(id=post_id))
+            print(saved_posts)  
+            for saved_post in saved_posts:
+                saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
 
-        return HttpResponse("saved successfully")
-
+            return HttpResponse("saved successfully")
+        else:
+            return HttpResponse("Post already exists")
+@login_required(login_url='/login') 
 def get_saved_post(request):
     saved_list=list()
     
@@ -538,23 +680,27 @@ def get_saved_post(request):
     for saved_post in saved_posts:
         saved_list.append({"user":{"username":saved_post.user.username},"post":{"id":saved_post.post.id},"profile":Profile.objects.get(user=saved_post.user)})
     return JsonResponse({"saved":saved_list})
-
+@login_required(login_url='/login') 
 def share(request):
     shared_list=list()
     if request.method=='POST':
+        print(request.POST)
         user=request.user,
-        post_id=request.POST['post_id']
         
-        Shared_Post.objects.create(user=user,post=Post.objects.get(id=post_id))
-        shared_post=Shared_Post.objects.filtet(post=Post.objects.get(id=post_id))
-        print(shared_post)
+        post_id=request.POST['post']
+        # print(post_id)    
+        
+        # Shared_Post.objects.create(user=user,post=Post.objects.get(id=post_id))
+        # shared_post=Shared_Post.objects.filtet(post=Post.objects.get(id=post_id))
+        # print(shared_post)
+        shared_post=list()
         post=Post.objects.get(id=post_id)
         post.no_of_shares=post.no_of_shares+1
         post.save()
         for shared_post in shared_post:
             shared_list.append({"user":{"username":shared_post.user.username},"post":{"id":shared_post.post.id},"profile":Profile.objects.get(user=shared_post.user)})
         return JsonResponse({"saved":shared_list})
-
+@login_required(login_url='/login') 
 def get_shared_post(request):
     shared_list=list()
     
@@ -570,3 +716,84 @@ def get_shared_post(request):
         shared_list.append({"user":{"username":shared_post.user.username},"post":{"id":shared_post.post.id},"profile":Profile.objects.get(user=shared_post.user)})
     return JsonResponse({"saved":shared_list})
 
+@login_required(login_url='/login') 
+def message_page_view(request):
+    user_profile = Profile.objects.get(user=request.user)
+    friends=list()
+    frnd_possblty_1=Friend.objects.filter(sender_profile=Profile.objects.get(user=request.user))
+    frnd_possblty_2=Friend.objects.filter(receiver_profile=Profile.objects.get(user=request.user))
+    if frnd_possblty_1:
+        for friend in frnd_possblty_1:
+            friends.append(friend)
+    if frnd_possblty_2:
+        for friend in frnd_possblty_2:
+            friends.append(friend)
+    print(friends)  
+    context={
+        'friends':friend,
+        "profile":user_profile,
+        "user":user_profile.user
+    }
+    return render(request,'feed/message_page.html',context)
+@login_required(login_url='/login') 
+def get_notification(request):
+    notification_list=list()
+    def check_date(date1):
+        date1=datetime.strptime(str(date1)[:10], '%Y-%m-%d')
+        date2=datetime.strptime(str(datetime.now())[:10], '%Y-%m-%d')
+        delta=date2-date1
+        if date2==date1:
+            return 'Today'
+        elif date1==date2-timedelta(days=1):
+            return 'yesterday'
+        else:
+            return str(date1)[:10]
+    
+    user=request.user
+    if request.method == 'GET':
+        notifications=Notification.objects.filter(user=user).order_by('-date')
+        for notification in notifications:
+            
+            print(notification.value)
+            print(notification.date)
+            print(datetime.now())
+            print(notification.post)
+            print(notification.viewed)
+            profile=Profile.objects.get(user=User.objects.get(username=str(notification.value).split()[0]))    
+            notification_list.append({
+                "value":notification.value,
+                "date":check_date(notification.date),
+                "post":notification.post.id,
+                "viewed":notification.viewed,
+                "profile":{'user':profile.user.username,'image':profile.profile.url}
+            })
+            
+            
+       
+    print(notification_list)
+    
+    return JsonResponse({"notification":notification_list})
+        
+        
+@login_required(login_url='/login')    
+def post_page(request,id):
+    post=Post.objects.get(id=id)
+    friends=list()
+    frnd_possblty_1=Friend.objects.filter(sender_profile=Profile.objects.get(user=request.user))
+    frnd_possblty_2=Friend.objects.filter(receiver_profile=Profile.objects.get(user=request.user))
+    if frnd_possblty_1:
+        for friend in frnd_possblty_1:
+            friends.append(friend)
+    if frnd_possblty_2:
+        for friend in frnd_possblty_2:
+            friends.append(friend)
+    
+    context={
+        "post":post,
+        "user":request.user,
+        "profile":Profile.objects.get(user=request.user),
+        "friends":friends
+        
+    }
+
+    return render(request,'feed/post_page.html',context)

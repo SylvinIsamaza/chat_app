@@ -12,10 +12,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
-import dj_database_url
-from dotenv import load_dotenv,dotenv_values
-load_dotenv()
+from dotenv import load_dotenv, dotenv_values
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -28,7 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app','.now.sh','127.0.0.1','localhost']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -77,12 +76,16 @@ WSGI_APPLICATION = 'social_media.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'),
+        'PORT': os.getenv('PORT')
     }
 }
 # DATABASES["default"]=dj_database_url.parse(os.getenv("DATABASE_URL"))
-#postgres://chat_70ml_user:swQvtUAC39373CLPboNazoUjw3TOgrGr@dpg-ck05asojs92s73dk94pg-a.oregon-postgres.render.com/chat_70ml
+# postgres://chat_70ml_user:swQvtUAC39373CLPboNazoUjw3TOgrGr@dpg-ck05asojs92s73dk94pg-a.oregon-postgres.render.com/chat_70ml
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -127,5 +130,4 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = "/media/"
-MEDIA_ROOT=os.path.join(BASE_DIR,"media")
-    
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
